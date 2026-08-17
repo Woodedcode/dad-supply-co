@@ -1,13 +1,13 @@
 import Cart from "../components/Cart"
 
-function CartPage({cartItems,removeFromCart}) {
+function CartPage({cartItems,removeFromCart,increaseQuantity}) {
     return (
         <section className="cart-page">
             <div className="cart-page__header">
                 <p>YOUR GEAR</p>
                 <h1>Your Cart</h1>
             </div>
-            <Cart cartItems={cartItems} removeFromCart={removeFromCart}/>
+            <Cart cartItems={cartItems} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity}/>
         </section>
     );
 }

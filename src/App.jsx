@@ -20,8 +20,16 @@ function App() {
   }, [cartItems]);
 
   const removeFromCart = (indexToRemove) => {
-    setCartItems(cartItems.filter((item, index) => index !== indexToRemove));
-  };
+    setCartItems(
+      cartItems
+      .map((item,index) =>
+      index === indexToRemove
+      ? {...item,quantity: item.quantity - 1}
+      : item
+    )
+    .filter((item) => item.quantity > 0)
+    )
+  }
 
   const addToCart = (products) => {
   const existingItem = cartItems.find(
@@ -142,7 +150,7 @@ const cartCount = cartItems.reduce((total, item) => {
           <Route
             path="/cart"
             element={
-              <CartPage cartItems={cartItems} removeFromCart={removeFromCart} />
+              <CartPage cartItems={cartItems} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity} />
             }
           />
         </Routes>
