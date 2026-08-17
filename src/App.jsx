@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import DadSupplyLogo from "./assets/dad-supply-logo.png";
 import HeroImage from "./assets/hero-image.png";
@@ -9,7 +9,21 @@ import DadSupplyHat from "./assets/dad-supply-hat.png";
 import CartPage from "./pages/CartPage";
 
 function App() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    const savedCart = localStorage.getItem("cartItems");
+
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  const removeFromCart = (indexToRemove) => {
+    setCartItems(
+      cartItems.filter((item, index) => index !== indexToRemove)
+    );
+  };
 
   return (
     <div className="app">
@@ -91,7 +105,7 @@ function App() {
             }
           />
 
-          <Route path="/cart" element={<CartPage cartItems={cartItems} />} />
+          <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} />} />
         </Routes>
       </main>
     </div>
