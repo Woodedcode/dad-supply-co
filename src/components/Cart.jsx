@@ -1,10 +1,15 @@
-
+import {Link} from "react-router-dom";
 
 function Cart({cartItems}) {
     return (
         <section className="cart-preview">
             {cartItems.length === 0 && (
-                <p className="cart-empty">Your cart is empty.</p>
+                <>
+                    <p className="cart-empty">Your cart is empty.</p>
+                    <Link to="/" className="cart-empty__link">
+                        Continue Shopping
+                    </Link>
+                </>
             )}
             {cartItems.map((item, index) =>(
                 <div className="cart-item" key={index}>
