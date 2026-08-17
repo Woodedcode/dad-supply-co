@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import DadSupplyLogo from "./assets/dad-supply-logo.png";
 import HeroImage from "./assets/hero-image.png";
@@ -20,10 +20,46 @@ function App() {
   }, [cartItems]);
 
   const removeFromCart = (indexToRemove) => {
-    setCartItems(
-      cartItems.filter((item, index) => index !== indexToRemove)
-    );
+    setCartItems(cartItems.filter((item, index) => index !== indexToRemove));
   };
+
+  const addToCart = (products) => {
+  const existingItem = cartItems.find(
+    (item) => item.name === products.name
+  );
+
+  if (existingItem) {
+    setCartItems(
+      cartItems.map((item) =>
+        item.name === products.name
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  } else {
+    setCartItems([
+      ...cartItems,
+      {
+        ...products,
+        quantity: 1,
+      },
+    ]);
+  }
+};
+
+const increaseQuantity = (indexToIncrease) => {
+  setCartItems(
+    cartItems.map((item,index) =>
+    index === indexToIncrease
+    ? {...item,quantity: item.quantity + 1}
+    : item
+    )
+  );
+};
+
+const cartCount = cartItems.reduce((total, item) => {
+  return total + item.quantity;
+}, 0)
 
   return (
     <div className="app">
@@ -39,7 +75,7 @@ function App() {
         <nav className="nav__links">
           <Link to="/">Shop</Link>
           <a href="#">About</a>
-          <Link to="/cart">Cart ({cartItems.length})</Link>
+          <Link to="/cart">Cart ({cartCount})</Link>
         </nav>
       </header>
 
@@ -73,14 +109,11 @@ function App() {
                       price="$28.00"
                       image={DadSupplyTee}
                       addToCart={() =>
-                        setCartItems([
-                          ...cartItems,
-                          {
-                            name: "Dad Supply Tee",
-                            price: "$28.00",
-                            image: DadSupplyTee,
-                          },
-                        ])
+                        addToCart({
+                          name: "Dad Supply Tee",
+                          price: "$28.00",
+                          image: DadSupplyTee,
+                        })
                       }
                     />
 
@@ -95,6 +128,7 @@ function App() {
                             name: "Dad Supply Trucker Hat",
                             price: "$32.00",
                             image: DadSupplyHat,
+                            quantity: 1,
                           },
                         ])
                       }
@@ -105,7 +139,12 @@ function App() {
             }
           />
 
-          <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} />} />
+          <Route
+            path="/cart"
+            element={
+              <CartPage cartItems={cartItems} removeFromCart={removeFromCart} />
+            }
+          />
         </Routes>
       </main>
     </div>
