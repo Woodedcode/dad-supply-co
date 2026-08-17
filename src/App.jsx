@@ -65,6 +65,12 @@ const increaseQuantity = (indexToIncrease) => {
   );
 };
 
+const removeItem = (indexToRemove) => {
+  setCartItems(
+    cartItems.filter((item, index) => index !== indexToRemove)
+  );
+};
+
 const cartCount = cartItems.reduce((total, item) => {
   return total + item.quantity;
 }, 0)
@@ -150,7 +156,7 @@ const cartCount = cartItems.reduce((total, item) => {
           <Route
             path="/cart"
             element={
-              <CartPage cartItems={cartItems} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity} />
+              <CartPage cartItems={cartItems} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity} removeItem={removeItem}/>
             }
           />
         </Routes>

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function Cart({ cartItems, removeFromCart, increaseQuantity }) {
+function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
   const subtotal = cartItems.reduce((total, item) => {
     return total + parseFloat(item.price.replace("$", "")) * item.quantity;
   }, 0);
@@ -36,6 +36,7 @@ function Cart({ cartItems, removeFromCart, increaseQuantity }) {
             >
               +
             </button>
+            <button className="cart-item__remove-link" onClick={() => removeItem(index)}>Remove Item</button>
             </div>
           </div>
         </div>
