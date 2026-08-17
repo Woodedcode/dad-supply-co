@@ -1,0 +1,181 @@
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.header__logo {
+  width: 250px;
+}
+
+.header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: white;
+}
+
+/* 
+  NAVIGATION
+*/
+.nav__links{
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav__links a{
+  text-decoration: none;
+  color: black;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 
+  HERO
+*/
+.hero{
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hero h2{
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.hero p{
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.hero button{
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  background-color: black;
+  color: whitesmoke;
+  cursor: pointer;
+}
+
+.hero__image{
+  margin: 0;
+}
+
+.hero__image img{
+  width: 100%;
+  display: block;
+}
+
+.hero__content{
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  transform: translateY(-50%);
+  z-index: 2;
+  text-align: left;
+  max-width: 420px;
+}
+
+.hero__content h1{
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.hero__content p{
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  max-width: 340px;
+}
+
+.hero button:hover{
+  background-color: #333;
+}
+
+ /* 
+  FEATURED PRODUCTS
+ */
+
+ .featured{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 40px;
+ }
+
+ .featured__products{
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+ }
+
+ .featured h2{
+  font-size: 32px;
+  margin-bottom: 32px;
+ }
+
+ .product-card{
+  width: 300px;
+  transition: transform 0.2s ease;
+ }
+
+ .product-card:hover{
+  transform: translateY(-15px);
+ }
+
+ .product-card__image img{
+  width: 100%;
+  display: block;
+  transition: transform 0.3s ease;
+ }
+
+ .product-card:hover .product-card__image img{
+  transform: scale(1.05);
+ }
+
+ .product-card__info{
+  padding-top: 16px;
+ }
+
+ .product-card__info h3{
+  font-size: 18px;
+  margin-bottom: 8px;
+ }
+
+ .product-card__info p{
+  font-size: 16px;
+  margin-bottom: 16px;
+ }
+
+ .product-card__info button{
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background-color: black;
+  color: whitesmoke;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+ }
+
+ .product-card button:hover{
+  background-color: #333;
+  transform: scale(1.03);
+ }
