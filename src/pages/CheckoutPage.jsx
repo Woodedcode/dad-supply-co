@@ -19,7 +19,7 @@ function CheckoutPage({cartItems, clearCart}) {
     if (orderPlaced) {
             return (
                 <section className="checkout-page">
-                    <div className="checkout-page__header">
+                    <div className="checkout-confirmation">
                         <p className="order-confirmation__eyebrow">
                             ORDER CONFIRMED
                         </p>
