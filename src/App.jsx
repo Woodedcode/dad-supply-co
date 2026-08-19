@@ -7,6 +7,7 @@ import ProductCard from "./components/ProductCard";
 import DadSupplyTee from "./assets/dad-supply-tee.png";
 import DadSupplyHat from "./assets/dad-supply-hat.png";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 function App() {
   const [cartItems, setCartItems] = useState(() => {
@@ -159,6 +160,7 @@ const cartCount = cartItems.reduce((total, item) => {
               <CartPage cartItems={cartItems} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity} removeItem={removeItem}/>
             }
           />
+          <Route path="/checkout" element={<CheckoutPage  cartItems={cartItems}/>} />
         </Routes>
       </main>
     </div>

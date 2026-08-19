@@ -47,7 +47,7 @@ function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
             <p>Subtotal</p>
             <p>${subtotal.toFixed(2)}</p>
           </div>
-          <button className="cart-summary__checkout">Checkout</button>
+          <Link to="/checkout" className="cart-summary__checkout">Checkout</Link>
         </div>
       )}
     </section>
