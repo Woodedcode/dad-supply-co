@@ -1,7 +1,8 @@
 import {useState} from 'react';
+import {Link} from "react-router-dom";
 
 
-function CheckoutPage({cartItems}) {
+function CheckoutPage({cartItems, clearCart}) {
     const [orderPlaced, setOrderPlaced] = useState(false)
 
     const subtotal = cartItems.reduce((total, item) => {
@@ -10,6 +11,8 @@ function CheckoutPage({cartItems}) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+
+        clearCart();
         setOrderPlaced(true)
     };
 
@@ -17,10 +20,24 @@ function CheckoutPage({cartItems}) {
             return (
                 <section className="checkout-page">
                     <div className="checkout-page__header">
-                        <p>ORDER CONFIRMED</p>
-                        <h1>Dad Duty Complete.</h1>
+                        <p className="order-confirmation__eyebrow">
+                            ORDER CONFIRMED
+                        </p>
+
+                        <h1>Dad Duty Complete</h1>
+
+                        <p className="order-confirmation__message">
+                            Your order have been placed successfully.
+                        </p>
+
+                        <p className="order-confirmation__subtext">
+                            Your dad gear secured. Mission accomplished.
+                        </p>
+
+                        <Link to="/" className="order-confirmation__link">
+                            Continue Shopping
+                        </Link>
                     </div>
-                    <p>Your order has been placed successfully.</p>
                 </section>
             );
         }
@@ -31,7 +48,7 @@ function CheckoutPage({cartItems}) {
         <h1>Checkout</h1>
       </div>
       <div className="checkout-layout">
-        <form action="" id="checkout-form" onSubmit={handleSubmit} className="checkout-form">
+        <form id="checkout-form" onSubmit={handleSubmit} className="checkout-form">
           <h2>Contact Information</h2>
 
           <label>

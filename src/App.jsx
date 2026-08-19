@@ -76,6 +76,10 @@ const cartCount = cartItems.reduce((total, item) => {
   return total + item.quantity;
 }, 0)
 
+const clearCart = () => {
+  setCartItems([]);
+};
+
   return (
     <div className="app">
       <header className="header">
@@ -160,7 +164,7 @@ const cartCount = cartItems.reduce((total, item) => {
               <CartPage cartItems={cartItems} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity} removeItem={removeItem}/>
             }
           />
-          <Route path="/checkout" element={<CheckoutPage  cartItems={cartItems}/>} />
+          <Route path="/checkout" element={<CheckoutPage  cartItems={cartItems} clearCart={clearCart}/>} />
         </Routes>
       </main>
     </div>
