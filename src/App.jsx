@@ -80,16 +80,39 @@ function App() {
     <div className="app">
       <header className="header">
         <figure>
-          <img
-            src={DadSupplyLogo}
-            alt="Dad Supply Logo"
-            className="header__logo"
-          />
+          <Link to="/">
+            <img
+              src={DadSupplyLogo}
+              alt="Dad Supply Logo"
+              className="header__logo"
+            />
+          </Link>
         </figure>
 
         <nav className="nav__links">
-          <Link to="/">Shop</Link>
-          <a href="#about">About</a>
+          <Link
+            to="/"
+            onClick={() => {
+              setTimeout(() => {
+                document
+                  .getElementById("featured-products")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }, 100);
+            }}
+          >
+            Shop
+          </Link>
+          <Link
+          to="/#about"
+          onClick={() => {
+            setTimeout(() => {
+              document
+              .getElementById("about")
+              ?.scrollIntoView({behavior: "smooth"});
+            },300)
+          }}>
+            About
+          </Link>
           <Link to="/cart">Cart ({cartCount})</Link>
         </nav>
       </header>
@@ -157,7 +180,10 @@ function App() {
                 <section className="about" id="about">
                   <h2>About Dad Supply Co.</h2>
                   <p>
-                    Dad Supply Co. is made for dads doing their best, cracking terrible jokes, hauling too much stuff, and somehow keeping it all together. <br/><br/>
+                    Dad Supply Co. is made for dads doing their best, cracking
+                    terrible jokes, hauling too much stuff, and somehow keeping
+                    it all together. <br />
+                    <br />
                     Comfortable gear for the everyday chaos of dad life.
                   </p>
                 </section>
