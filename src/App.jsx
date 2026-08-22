@@ -136,22 +136,18 @@ const clearCart = () => {
                       }
                     />
 
-                    <ProductCard
+                    <ProductCard 
                       name="Dad Supply Trucker Hat"
                       price="$32.00"
                       image={DadSupplyHat}
-                      addToCart={() =>
-                        setCartItems([
-                          ...cartItems,
-                          {
-                            name: "Dad Supply Trucker Hat",
-                            price: "$32.00",
-                            image: DadSupplyHat,
-                            quantity: 1,
-                          },
-                        ])
+                      addToCart={() => 
+                        addToCart({
+                          name:"Dad Supply Trucker Hat",
+                          price: "$32.00",
+                          image: DadSupplyHat,
+                        })
                       }
-                    />
+                      />
                   </div>
                 </section>
               </>
