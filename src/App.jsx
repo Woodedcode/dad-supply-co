@@ -157,7 +157,8 @@ function App() {
                 <section className="about" id="about">
                   <h2>About Dad Supply Co.</h2>
                   <p>
-                    Dad Supply Co. is built for dads who work hard, laugh often, and take life seriously enough to enjoy it.
+                    Dad Supply Co. is made for dads doing their best, cracking terrible jokes, hauling too much stuff, and somehow keeping it all together. <br/><br/>
+                    Comfortable gear for the everyday chaos of dad life.
                   </p>
                 </section>
               </>

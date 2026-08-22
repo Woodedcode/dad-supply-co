@@ -1,6 +1,7 @@
-
+import {useState} from 'react';
 
 function ProductCard({name, price, image, addToCart}) {
+  const [added, setAdded] = useState(false);
  
     return (
     <>
@@ -12,7 +13,14 @@ function ProductCard({name, price, image, addToCart}) {
         <div className="product-card__info">
           <h3>{name}</h3>
           <p>{price}</p>
-          <button onClick={addToCart}>Add to Cart</button>
+          <button onClick={() => {
+            addToCart();
+            setAdded(true);
+
+            setTimeout(() => {
+              setAdded(false);
+            }, 1500)
+          }}>{added ? "✓ Added!" : "Add to Cart"}</button>
         </div>
       </article>
     </>
