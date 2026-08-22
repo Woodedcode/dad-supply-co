@@ -44,6 +44,35 @@ html{
 }
 
 /* 
+  ABOUT
+*/
+
+#about{
+  scroll-margin-top: 120px;
+}
+
+.about {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 40px;
+}
+
+.about h2 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.about p {
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 700px;
+}
+
+#about {
+  scroll-margin-top: 120px;
+}
+
+/* 
   HERO
 */
 .hero{

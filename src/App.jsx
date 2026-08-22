@@ -89,7 +89,7 @@ function App() {
 
         <nav className="nav__links">
           <Link to="/">Shop</Link>
-          <a href="#">About</a>
+          <a href="#about">About</a>
           <Link to="/cart">Cart ({cartCount})</Link>
         </nav>
       </header>
@@ -153,6 +153,12 @@ function App() {
                       }
                     />
                   </div>
+                </section>
+                <section className="about" id="about">
+                  <h2>About Dad Supply Co.</h2>
+                  <p>
+                    Dad Supply Co. is built for dads who work hard, laugh often, and take life seriously enough to enjoy it.
+                  </p>
                 </section>
               </>
             }
