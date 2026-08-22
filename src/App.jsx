@@ -23,62 +23,58 @@ function App() {
   const removeFromCart = (indexToRemove) => {
     setCartItems(
       cartItems
-      .map((item,index) =>
-      index === indexToRemove
-      ? {...item,quantity: item.quantity - 1}
-      : item
-    )
-    .filter((item) => item.quantity > 0)
-    )
-  }
+        .map((item, index) =>
+          index === indexToRemove
+            ? { ...item, quantity: item.quantity - 1 }
+            : item,
+        )
+        .filter((item) => item.quantity > 0),
+    );
+  };
 
   const addToCart = (products) => {
-  const existingItem = cartItems.find(
-    (item) => item.name === products.name
-  );
+    const existingItem = cartItems.find((item) => item.name === products.name);
 
-  if (existingItem) {
+    if (existingItem) {
+      setCartItems(
+        cartItems.map((item) =>
+          item.name === products.name
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        ),
+      );
+    } else {
+      setCartItems([
+        ...cartItems,
+        {
+          ...products,
+          quantity: 1,
+        },
+      ]);
+    }
+  };
+
+  const increaseQuantity = (indexToIncrease) => {
     setCartItems(
-      cartItems.map((item) =>
-        item.name === products.name
+      cartItems.map((item, index) =>
+        index === indexToIncrease
           ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
+          : item,
+      ),
     );
-  } else {
-    setCartItems([
-      ...cartItems,
-      {
-        ...products,
-        quantity: 1,
-      },
-    ]);
-  }
-};
+  };
 
-const increaseQuantity = (indexToIncrease) => {
-  setCartItems(
-    cartItems.map((item,index) =>
-    index === indexToIncrease
-    ? {...item,quantity: item.quantity + 1}
-    : item
-    )
-  );
-};
+  const removeItem = (indexToRemove) => {
+    setCartItems(cartItems.filter((item, index) => index !== indexToRemove));
+  };
 
-const removeItem = (indexToRemove) => {
-  setCartItems(
-    cartItems.filter((item, index) => index !== indexToRemove)
-  );
-};
+  const cartCount = cartItems.reduce((total, item) => {
+    return total + item.quantity;
+  }, 0);
 
-const cartCount = cartItems.reduce((total, item) => {
-  return total + item.quantity;
-}, 0)
-
-const clearCart = () => {
-  setCartItems([]);
-};
+  const clearCart = () => {
+    setCartItems([]);
+  };
 
   return (
     <div className="app">
@@ -111,7 +107,15 @@ const clearCart = () => {
                       Quality gear for dads who take absolutely nothing too
                       serious.
                     </p>
-                    <button>Shop Now</button>
+                    <button
+                      onClick={() => {
+                        document
+                          .getElementById("featured-products")
+                          .scrollIntoView({ behavior: "smooth" });
+                      }}
+                    >
+                      Shop Now
+                    </button>
                   </div>
 
                   <figure className="hero__image">
@@ -119,7 +123,7 @@ const clearCart = () => {
                   </figure>
                 </section>
 
-                <section className="featured">
+                <section className="featured" id="featured-products">
                   <h2>Featured Products</h2>
 
                   <div className="featured__products">
@@ -136,18 +140,18 @@ const clearCart = () => {
                       }
                     />
 
-                    <ProductCard 
+                    <ProductCard
                       name="Dad Supply Trucker Hat"
                       price="$32.00"
                       image={DadSupplyHat}
-                      addToCart={() => 
+                      addToCart={() =>
                         addToCart({
-                          name:"Dad Supply Trucker Hat",
+                          name: "Dad Supply Trucker Hat",
                           price: "$32.00",
                           image: DadSupplyHat,
                         })
                       }
-                      />
+                    />
                   </div>
                 </section>
               </>
@@ -157,10 +161,20 @@ const clearCart = () => {
           <Route
             path="/cart"
             element={
-              <CartPage cartItems={cartItems} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity} removeItem={removeItem}/>
+              <CartPage
+                cartItems={cartItems}
+                removeFromCart={removeFromCart}
+                increaseQuantity={increaseQuantity}
+                removeItem={removeItem}
+              />
             }
           />
-          <Route path="/checkout" element={<CheckoutPage  cartItems={cartItems} clearCart={clearCart}/>} />
+          <Route
+            path="/checkout"
+            element={
+              <CheckoutPage cartItems={cartItems} clearCart={clearCart} />
+            }
+          />
         </Routes>
       </main>
     </div>
