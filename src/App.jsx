@@ -33,12 +33,17 @@ function App() {
   };
 
   const addToCart = (products) => {
-    const existingItem = cartItems.find((item) => item.name === products.name);
+    const existingItem = cartItems.find(
+      (item) => 
+      item.name === products.name && 
+      item.size === products.size,
+    );
 
     if (existingItem) {
       setCartItems(
         cartItems.map((item) =>
-          item.name === products.name
+          item.name === products.name &&
+          item.size === products.size
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         ),
@@ -103,14 +108,15 @@ function App() {
             Shop
           </Link>
           <Link
-          to="/#about"
-          onClick={() => {
-            setTimeout(() => {
-              document
-              .getElementById("about")
-              ?.scrollIntoView({behavior: "smooth"});
-            },300)
-          }}>
+            to="/#about"
+            onClick={() => {
+              setTimeout(() => {
+                document
+                  .getElementById("about")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }, 300);
+            }}
+          >
             About
           </Link>
           <Link to="/cart">Cart ({cartCount})</Link>
@@ -154,11 +160,13 @@ function App() {
                       name="Dad Supply Tee"
                       price="$28.00"
                       image={DadSupplyTee}
-                      addToCart={() =>
+                      sizes={["S", "M", "L", "XL", "2XL"]}
+                      addToCart={(selectedSize) =>
                         addToCart({
                           name: "Dad Supply Tee",
                           price: "$28.00",
                           image: DadSupplyTee,
+                          size: selectedSize,
                         })
                       }
                     />

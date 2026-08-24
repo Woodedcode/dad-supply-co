@@ -21,22 +21,28 @@ function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
 
           <div>
             <p className="cart-item__para-name">{item.name}</p>
+            {item.size && <p className="cart-item__size">Size: {item.size}</p>}
             <p className="cart-price">{item.price}</p>
             <div className="cart-item__controls">
-                <button
-              className="cart-item__quantity"
-              onClick={() => removeFromCart(index)}
-            >
-              -
-            </button>
-            <p className="cart-quantity">{item.quantity}</p>
-            <button
-              className="cart-item__quantity"
-              onClick={() => increaseQuantity(index)}
-            >
-              +
-            </button>
-            <button className="cart-item__remove-link" onClick={() => removeItem(index)}>Remove Item</button>
+              <button
+                className="cart-item__quantity"
+                onClick={() => removeFromCart(index)}
+              >
+                -
+              </button>
+              <p className="cart-quantity">{item.quantity}</p>
+              <button
+                className="cart-item__quantity"
+                onClick={() => increaseQuantity(index)}
+              >
+                +
+              </button>
+              <button
+                className="cart-item__remove-link"
+                onClick={() => removeItem(index)}
+              >
+                Remove Item
+              </button>
             </div>
           </div>
         </div>
@@ -47,7 +53,9 @@ function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
             <p>Subtotal</p>
             <p>${subtotal.toFixed(2)}</p>
           </div>
-          <Link to="/checkout" className="cart-summary__checkout">Checkout</Link>
+          <Link to="/checkout" className="cart-summary__checkout">
+            Checkout
+          </Link>
         </div>
       )}
     </section>

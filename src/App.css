@@ -215,6 +215,26 @@ html{
  }
 
  /* 
+  PRODUCT SIZES
+ */
+
+ .product-card__size-error {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 6px 0;
+}
+
+.product-card__info select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+ /* 
   CART
  */
 
@@ -645,6 +665,11 @@ html{
 
 .cart-page {
   padding: 50px 0;
+}
+
+.cart-page__header p, 
+.cart-page__header h1{
+  margin-left: 10px;
 }
 
 .cart-preview {

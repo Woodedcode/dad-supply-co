@@ -1,46 +1,43 @@
-import {useState} from 'react';
-import {Link} from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
+function CheckoutPage({ cartItems, clearCart }) {
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
-function CheckoutPage({cartItems, clearCart}) {
-    const [orderPlaced, setOrderPlaced] = useState(false)
+  const subtotal = cartItems.reduce((total, item) => {
+    return total + parseFloat(item.price.replace("$", "")) * item.quantity;
+  }, 0);
 
-    const subtotal = cartItems.reduce((total, item) => {
-        return total + parseFloat(item.price.replace("$","")) * item.quantity;
-    }, 0)
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
+    clearCart();
+    setOrderPlaced(true);
+  };
 
-        clearCart();
-        setOrderPlaced(true)
-    };
+  if (orderPlaced) {
+    return (
+      <section className="checkout-page">
+        <div className="checkout-confirmation">
+          <p className="order-confirmation__eyebrow">ORDER CONFIRMED</p>
 
-    if (orderPlaced) {
-            return (
-                <section className="checkout-page">
-                    <div className="checkout-confirmation">
-                        <p className="order-confirmation__eyebrow">
-                            ORDER CONFIRMED
-                        </p>
+          <h1>Dad Duty Complete</h1>
 
-                        <h1>Dad Duty Complete</h1>
+          <p className="order-confirmation__message">
+            Your order have been placed successfully.
+          </p>
 
-                        <p className="order-confirmation__message">
-                            Your order have been placed successfully.
-                        </p>
+          <p className="order-confirmation__subtext">
+            Your dad gear secured. Mission accomplished.
+          </p>
 
-                        <p className="order-confirmation__subtext">
-                            Your dad gear secured. Mission accomplished.
-                        </p>
-
-                        <Link to="/" className="order-confirmation__link">
-                            Continue Shopping
-                        </Link>
-                    </div>
-                </section>
-            );
-        }
+          <Link to="/" className="order-confirmation__link">
+            Continue Shopping
+          </Link>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="checkout-page">
       <div className="checkout-page__header">
@@ -48,12 +45,16 @@ function CheckoutPage({cartItems, clearCart}) {
         <h1>Checkout</h1>
       </div>
       <div className="checkout-layout">
-        <form id="checkout-form" onSubmit={handleSubmit} className="checkout-form">
+        <form
+          id="checkout-form"
+          onSubmit={handleSubmit}
+          className="checkout-form"
+        >
           <h2>Contact Information</h2>
 
           <label>
             Email
-            <input type="email" placeholder="Dad@email.com" required/>
+            <input type="email" placeholder="Dad@email.com" required />
           </label>
 
           <label>
@@ -82,11 +83,14 @@ function CheckoutPage({cartItems, clearCart}) {
 
         <aside className="checkout-summary">
           <h2>Order Summary</h2>
-          {cartItems.map((item,index) =>(
+          {cartItems.map((item, index) => (
             <div className="checkout-summary__item" key={index}>
-                <p>{item.name}</p>
-                <p>Qty: {item.quantity}</p>
-                <p>{item.price}</p>
+              <p>{item.name}</p>
+
+              {item.size && <p>Size: {item.size}</p>}
+
+              <p>Qty: {item.quantity}</p>
+              <p>{item.price}</p>
             </div>
           ))}
           <div className="checkout-summary__total">
