@@ -4,8 +4,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import DadSupplyLogo from "./assets/dad-supply-logo.png";
 import HeroImage from "./assets/hero-image.png";
 import ProductCard from "./components/ProductCard";
-import DadSupplyTee from "./assets/dad-supply-tee.png";
-import DadSupplyHat from "./assets/dad-supply-hat.png";
+import products from "./data/products.js";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 
@@ -34,16 +33,13 @@ function App() {
 
   const addToCart = (products) => {
     const existingItem = cartItems.find(
-      (item) => 
-      item.name === products.name && 
-      item.size === products.size,
+      (item) => item.name === products.name && item.size === products.size,
     );
 
     if (existingItem) {
       setCartItems(
         cartItems.map((item) =>
-          item.name === products.name &&
-          item.size === products.size
+          item.name === products.name && item.size === products.size
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         ),
@@ -156,33 +152,22 @@ function App() {
                   <h2>Featured Products</h2>
 
                   <div className="featured__products">
-                    <ProductCard
-                      name="Dad Supply Tee"
-                      price="$28.00"
-                      image={DadSupplyTee}
-                      sizes={["S", "M", "L", "XL", "2XL"]}
-                      addToCart={(selectedSize) =>
-                        addToCart({
-                          name: "Dad Supply Tee",
-                          price: "$28.00",
-                          image: DadSupplyTee,
-                          size: selectedSize,
-                        })
-                      }
-                    />
-
-                    <ProductCard
-                      name="Dad Supply Trucker Hat"
-                      price="$32.00"
-                      image={DadSupplyHat}
-                      addToCart={() =>
-                        addToCart({
-                          name: "Dad Supply Trucker Hat",
-                          price: "$32.00",
-                          image: DadSupplyHat,
-                        })
-                      }
-                    />
+                    {products.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        name={product.name}
+                        price={product.price}
+                        image={product.image}
+                        backImage={product.backImage}
+                        sizes={product.sizes}
+                        addToCart={(selectedSize) =>
+                          addToCart({
+                            ...product,
+                            size: selectedSize,
+                          })
+                        }
+                      />
+                    ))}
                   </div>
                 </section>
                 <section className="about" id="about">

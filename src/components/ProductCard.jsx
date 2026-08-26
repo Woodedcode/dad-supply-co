@@ -11,14 +11,15 @@ function ProductCard({ name, price, image, addToCart, sizes }) {
         <figure className="product-card__image">
           <img src={image} alt={name} />
         </figure>
+        
 
         <div className="product-card__info">
           <h3>{name}</h3>
           <p>{price}</p>
-          {sizes && (
+          {sizes && sizes[0] !== "One Size" && (
             <select
-              value={selectedSize}
-              onChange={(event) => setSelectedSize(event.target.value)}
+            value={selectedSize}
+            onChange={(event) => setSelectedSize(event.target.value)}
             >
               <option value="">Select Size</option>
 
@@ -29,6 +30,11 @@ function ProductCard({ name, price, image, addToCart, sizes }) {
               ))}
             </select>
           )}
+          {sizes && sizes[0] === "One Size" && (
+            <div className="product-card__one-size">
+              One Size
+            </div>
+          )}
           {sizeError && (
             <p className="product-card__size-error">
               Please select a size first.
@@ -36,7 +42,7 @@ function ProductCard({ name, price, image, addToCart, sizes }) {
           )}
           <button
             onClick={() => {
-              if (sizes && !selectedSize) {
+              if (sizes && sizes[0] !== "One Size" && !selectedSize) {
                 setSizeError(true);
 
                 setTimeout(() => {
@@ -46,7 +52,7 @@ function ProductCard({ name, price, image, addToCart, sizes }) {
                 return;
               }
 
-              addToCart(selectedSize);
+              addToCart(sizes[0] === "One Size" ? "One Size" : selectedSize);
               setAdded(true);
               setSizeError(false);
               setSelectedSize("")
