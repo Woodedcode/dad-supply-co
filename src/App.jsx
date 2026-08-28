@@ -91,18 +91,16 @@ function App() {
         </figure>
 
         <nav className="nav__links">
-          <Link
-            to="/"
-            onClick={() => {
-              setTimeout(() => {
-                document
-                  .getElementById("featured-products")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }, 100);
-            }}
-          >
-            Shop
-          </Link>
+          <div className="shop-dropdown">
+            <button className="shop-dropdown__button">Shop</button>
+
+            <div className="shop-dropdown__menu">
+              <Link to="/shirts">Shirts</Link>
+              <Link to="/matching">Matching Shirts</Link>
+              <Link to="/kids">Kids</Link>
+              <Link to="/hats">Hats</Link>
+            </div>
+          </div>
           <Link
             to="/#about"
             onClick={() => {
