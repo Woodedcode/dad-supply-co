@@ -7,6 +7,10 @@ import ProductCard from "./components/ProductCard";
 import products from "./data/products.js";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import ShirtsPage from "./pages/ShirtsPage.jsx";
+import HatsPage from "./pages/HatsPage.jsx";
+import MatchingPage from "./pages/MatchingPage";
+import KidsPage from "./pages/KidsPage";
 
 function App() {
   const [cartItems, setCartItems] = useState(() => {
@@ -130,15 +134,9 @@ function App() {
                       Quality gear for dads who take absolutely nothing too
                       serious.
                     </p>
-                    <button
-                      onClick={() => {
-                        document
-                          .getElementById("featured-products")
-                          .scrollIntoView({ behavior: "smooth" });
-                      }}
-                    >
+                    <Link to="/shirts" className="hero__shop-button">
                       Shop Now
-                    </button>
+                    </Link>
                   </div>
 
                   <figure className="hero__image">
@@ -150,22 +148,24 @@ function App() {
                   <h2>Featured Products</h2>
 
                   <div className="featured__products">
-                    {products.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        name={product.name}
-                        price={product.price}
-                        image={product.image}
-                        backImage={product.backImage}
-                        sizes={product.sizes}
-                        addToCart={(selectedSize) =>
-                          addToCart({
-                            ...product,
-                            size: selectedSize,
-                          })
-                        }
-                      />
-                    ))}
+                    {products
+                      .filter((product) => product.type === "shirt")
+                      .map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          name={product.name}
+                          price={product.price}
+                          image={product.image}
+                          backImage={product.backImage}
+                          sizes={product.sizes}
+                          addToCart={(selectedSize) =>
+                            addToCart({
+                              ...product,
+                              size: selectedSize,
+                            })
+                          }
+                        />
+                      ))}
                   </div>
                 </section>
                 <section className="about" id="about">
@@ -181,7 +181,13 @@ function App() {
               </>
             }
           />
-
+          <Route
+            path="/shirts"
+            element={<ShirtsPage addToCart={addToCart} />}
+          />
+          <Route path="/matching" element={<MatchingPage />} />
+          <Route path="/kids" element={<KidsPage />} />
+          <Route path="/hats" element={<HatsPage addToCart={addToCart} />} />
           <Route
             path="/cart"
             element={
