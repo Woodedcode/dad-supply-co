@@ -7,10 +7,12 @@ import ProductCard from "./components/ProductCard";
 import products from "./data/products.js";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import ProductPage from "./pages/ProductPage";
 import ShirtsPage from "./pages/ShirtsPage.jsx";
 import HatsPage from "./pages/HatsPage.jsx";
 import MatchingPage from "./pages/MatchingPage";
 import KidsPage from "./pages/KidsPage";
+
 
 function App() {
   const [cartItems, setCartItems] = useState(() => {
@@ -153,17 +155,10 @@ function App() {
                       .map((product) => (
                         <ProductCard
                           key={product.id}
+                          id={product.id}
                           name={product.name}
                           price={product.price}
                           image={product.image}
-                          backImage={product.backImage}
-                          sizes={product.sizes}
-                          addToCart={(selectedSize) =>
-                            addToCart({
-                              ...product,
-                              size: selectedSize,
-                            })
-                          }
                         />
                       ))}
                   </div>
@@ -181,6 +176,7 @@ function App() {
               </>
             }
           />
+          <Route path="/products/:id" element={<ProductPage />} />
           <Route
             path="/shirts"
             element={<ShirtsPage addToCart={addToCart} />}

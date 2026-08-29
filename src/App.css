@@ -243,6 +243,11 @@ html{
   margin-top: auto;
  }
 
+ .product-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
  .product-card button:hover{
   background-color: #333;
   transform: scale(1.03);
@@ -264,6 +269,41 @@ html{
   background: white;
   border: 1px solid #ccc;
   cursor: pointer;
+}
+
+/* 
+  PRODUCT PAGE
+*/
+
+.product-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 50px 24px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 50px;
+  align-items: start;
+}
+
+.product-page__images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.product-page__images img {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+.product-page__info {
+  text-align: left;
+  padding-top: 20px;
+}
+
+.product-page__info h1 {
+  margin-top: 0;
 }
 
  /* 
