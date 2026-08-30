@@ -2,14 +2,15 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import products from "../data/products";
 
-function ProductPage() {
+function ProductPage({ addToCart }) {
   const { id } = useParams();
 
-  const product = products.find(
-    (product) => String(product.id) === id
-  );
+  const product = products.find((product) => String(product.id) === id);
 
   const [selectedImage, setSelectedImage] = useState(product?.image);
+
+  const [selectedSize, setSelectedSize] = useState("");
+  const [added, setAdded] = useState(false);
 
   if (!product) {
     return <h1>Product not found</h1>;
@@ -17,33 +18,72 @@ function ProductPage() {
 
   return (
     <main className="product-page">
-      <div className="product-page__thumbnails">
-  <button onClick={() => setSelectedImage(product.image)}>
-    <img
-      src={product.image}
-      alt={`${product.name} front`}
-    />
-  </button>
+      <div className="product-page__images">
+        <div className="product-page__thumbnails">
+          <button onClick={() => setSelectedImage(product.image)}>
+            <img src={product.image} alt={`${product.name} front`} />
+          </button>
 
-  {product.backImage && (
-    <button onClick={() => setSelectedImage(product.backImage)}>
-      <img
-        src={product.backImage}
-        alt={`${product.name} back`}
-      />
-    </button>
-  )}
-</div>
+          {product.backImage && (
+            <button onClick={() => setSelectedImage(product.backImage)}>
+              <img src={product.backImage} alt={`${product.name} back`} />
+            </button>
+          )}
+        </div>
 
-<img
-  className="product-page__main-image"
-  src={selectedImage}
-  alt={product.name}
-/>
+        <div className="product-page__main-image-wrap">
+          <img
+            className="product-page__main-image"
+            src={selectedImage}
+            alt={product.name}
+          />
+        </div>
+      </div>
 
       <div className="product-page__info">
         <h1>{product.name}</h1>
-        <p>{product.price}</p>
+
+        <p className="product-page__price">{product.price}</p>
+
+        <p className="product-page__description">{product.description}</p>
+
+        <label htmlFor="product-size">Size</label>
+
+        <select
+          id="product-size"
+          value={selectedSize}
+          onChange={(event) => setSelectedSize(event.target.value)}
+        >
+          <option value="">Select Size</option>
+
+          {product.sizes?.map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+
+        <button
+          className="product-page__add-button"
+          onClick={() => {
+            if (!selectedSize) {
+              return;
+            }
+
+            addToCart({
+              ...product,
+              size: selectedSize,
+            });
+
+            setAdded(true);
+
+            setTimeout(() => {
+              setAdded(false);
+            }, 1500);
+          }}
+        >
+          {added ? "✓ Added to Cart!" : "Add to Cart"}
+        </button>
       </div>
     </main>
   );

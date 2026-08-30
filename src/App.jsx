@@ -13,7 +13,6 @@ import HatsPage from "./pages/HatsPage.jsx";
 import MatchingPage from "./pages/MatchingPage";
 import KidsPage from "./pages/KidsPage";
 
-
 function App() {
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem("cartItems");
@@ -176,7 +175,10 @@ function App() {
               </>
             }
           />
-          <Route path="/products/:id" element={<ProductPage />} />
+          <Route
+            path="/products/:id"
+            element={<ProductPage addToCart={addToCart} />}
+          />
           <Route
             path="/shirts"
             element={<ShirtsPage addToCart={addToCart} />}
