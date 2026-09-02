@@ -25,8 +25,8 @@ const products = [
         name: "Im-pasta Tee",
         price: "$28.00",
         type: "shirt",
-        image: ImpastaFront,
-        backImage: ImpastaBack,
+        image: ImpastaBack,
+        backImage: ImpastaFront,
         description:
             "A classic dad-joke tee featuring the ultimate fake noodle. Soft, comfortable, and built for maximum eye-roll potential.",
         sizes: ["S", "M", "L", "XL", "2XL"],
