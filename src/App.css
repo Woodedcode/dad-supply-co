@@ -173,20 +173,20 @@ html{
   margin-bottom: 32px;
  }
 
- .product-card{
+ .product-card {
   width: 313px;
   transition: transform 0.2s ease;
-  display: grid;
-  grid-template-rows: 300px 32px 28px 40px 48px;
- }
+  display: flex;
+  flex-direction: column;
+}
 
  .product-card:hover{
   transform: translateY(-15px);
  }
 
- .product-card__image {
+.product-card__image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 300px;
   overflow: hidden;
   position: relative;
 }
@@ -212,6 +212,7 @@ html{
   display: flex;
   flex-direction: column;
   min-height: 140px;
+  margin-top: 12px;
 }
 
  .product-card__info h3{
@@ -279,11 +280,10 @@ html{
   max-width: 1200px;
   margin: 0 auto;
   padding: 50px 40px;
-
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   grid-template-areas: "images info";
-  gap: 50px;
+  gap: 30px;
   align-items: start;
 }
 
@@ -317,7 +317,7 @@ html{
 }
 
 .product-page__main-image-wrap {
-  width: 520px;
+  width: 600px;
   max-width: 100%;
 }
 
@@ -331,7 +331,7 @@ html{
 .product-page__info {
   grid-area: info;
   text-align: left;
-  padding-top: 10px;
+  padding-top: 20px;
   max-width: 360px;
 }
 
@@ -380,6 +380,12 @@ html{
 
 .product-page__add-button:hover {
   background-color: #333;
+}
+
+.product-page__one-size {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 24px;
 }
 
  /* 
@@ -803,6 +809,10 @@ html{
 .shop-dropdown:hover .shop-dropdown__menu {
   display: block;
 }
+
+/* 
+
+*/
 
 /* 
   RESPONSIVENESS

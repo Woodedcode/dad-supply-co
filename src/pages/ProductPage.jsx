@@ -5,12 +5,14 @@ import products from "../data/products";
 function ProductPage({ addToCart }) {
   const { id } = useParams();
 
-  const product = products.find(
-    (product) => String(product.id) === id
-  );
+  const product = products.find((product) => String(product.id) === id);
 
   const [selectedImage, setSelectedImage] = useState(product?.image);
-  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedSize, setSelectedSize] = useState(
+    product?.sizes?.length === 1 && product.sizes[0] === "One Size"
+      ? "One Size"
+      : "",
+  );
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
 
@@ -21,24 +23,17 @@ function ProductPage({ addToCart }) {
   return (
     <main className="product-page">
       <div className="product-page__images">
-
-        <div className="product-page__thumbnails">
-          <button onClick={() => setSelectedImage(product.image)}>
-            <img
-              src={product.image}
-              alt={`${product.name} front`}
-            />
-          </button>
-
-          {product.backImage && (
-            <button onClick={() => setSelectedImage(product.backImage)}>
-              <img
-                src={product.backImage}
-                alt={`${product.name} back`}
-              />
+        {product.backImage && (
+          <div className="product-page__thumbnails">
+            <button onClick={() => setSelectedImage(product.image)}>
+              <img src={product.image} alt={`${product.name} front`} />
             </button>
-          )}
-        </div>
+
+            <button onClick={() => setSelectedImage(product.backImage)}>
+              <img src={product.backImage} alt={`${product.name} back`} />
+            </button>
+          </div>
+        )}
 
         <div className="product-page__main-image-wrap">
           <img
@@ -47,40 +42,41 @@ function ProductPage({ addToCart }) {
             alt={product.name}
           />
         </div>
-
       </div>
 
       <div className="product-page__info">
         <h1>{product.name}</h1>
 
-        <p className="product-page__price">
-          {product.price}
-        </p>
+        <p className="product-page__price">{product.price}</p>
 
-        <p className="product-page__description">
-          {product.description}
-        </p>
+        {product.sizes?.[0] === "One Size" && (
+          <p className="product-page__one-size">One Size</p>
+        )}
 
-        <label htmlFor="product-size">
-          Size
-        </label>
+        <p className="product-page__description">{product.description}</p>
 
-        <select
-          id="product-size"
-          value={selectedSize}
-          onChange={(event) => {
-            setSelectedSize(event.target.value);
-            setSizeError(false);
-          }}
-        >
-          <option value="">Select Size</option>
+        {product.sizes?.[0] !== "One Size" && (
+          <>
+            <label htmlFor="product-size">Size</label>
 
-          {product.sizes?.map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
+            <select
+              id="product-size"
+              value={selectedSize}
+              onChange={(event) => {
+                setSelectedSize(event.target.value);
+                setSizeError(false);
+              }}
+            >
+              <option value="">Select Size</option>
+
+              {product.sizes?.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
 
         {sizeError && (
           <p className="product-page__size-error">
@@ -111,7 +107,6 @@ function ProductPage({ addToCart }) {
         >
           {added ? "✓ Added to Cart!" : "Add to Cart"}
         </button>
-
       </div>
     </main>
   );

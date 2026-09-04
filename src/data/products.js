@@ -2,6 +2,10 @@ import DadSupplyTee from "../assets/dad-supply-tee.png";
 import DadSupplyHat from "../assets/dad-supply-hat.png";
 import ImpastaFront from "../assets/impasta-front.png";
 import ImpastaBack from "../assets/impasta-back.png";
+import DadSupplyJuniorFront from "../assets/dad-supply-junior-front.png";
+import DadSupplyJuniorBack from "../assets/dad-supply-junior-back.png";
+import DadSupplyBabyFront from "../assets/dad-supply-baby-front.png";
+import DadSupplyBabyBack from "../assets/dad-supply-baby-back.png";
 
 const products = [
     {
@@ -30,6 +34,28 @@ const products = [
         description:
             "A classic dad-joke tee featuring the ultimate fake noodle. Soft, comfortable, and built for maximum eye-roll potential.",
         sizes: ["S", "M", "L", "XL", "2XL"],
+},
+{
+        id: 4,
+        name: "Dad Supply Junior Tee",
+        price: "$22.00",
+        type: "kid",
+        image: DadSupplyJuniorFront,
+        backImage: DadSupplyJuniorBack,
+        description:
+            "Official gear for the next generation of dad-joke professionals.",
+        sizes: ["2T", "3T", "4T", "5T"],
+},
+{
+        id: 5,
+        name: "Dad Supply Baby Oneie",
+        price: "$22.00",
+        type: "kid",
+        image: DadSupplyBabyFront,
+        backImage: DadSupplyBabyBack,
+        description:
+            "Official gear for the next generation of dad-joke professionals.",
+        sizes: ["0-3M", "3-6M", "6-12M", "12-18M", "18-24M"],
 },
 ]
 

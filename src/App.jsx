@@ -183,8 +183,11 @@ function App() {
             path="/shirts"
             element={<ShirtsPage addToCart={addToCart} />}
           />
+
           <Route path="/matching" element={<MatchingPage />} />
-          <Route path="/kids" element={<KidsPage />} />
+
+          <Route path="/kids" element={<KidsPage addToCart={addToCart} />} />
+
           <Route path="/hats" element={<HatsPage addToCart={addToCart} />} />
           <Route
             path="/cart"
