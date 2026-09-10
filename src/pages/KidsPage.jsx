@@ -7,6 +7,9 @@ function KidsPage({ addToCart }) {
   return (
     <section className="featured">
       <h1>Kids</h1>
+      <p className="category-subtitle">
+        Little gear for the next generation of Dad-joke professionals.
+      </p>
 
       <div className="featured__products">
         {kids.map((product) => (

@@ -15,6 +15,8 @@ function ProductPage({ addToCart }) {
   );
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
+  const [selectedDadSize, setSelectedDadSize] = useState("");
+  const [selectedKidSize, setSelectedKidSize] = useState("");
 
   if (!product) {
     return <h1>Product not found</h1>;
@@ -57,24 +59,56 @@ function ProductPage({ addToCart }) {
 
         {product.sizes?.[0] !== "One Size" && (
           <>
-            <label htmlFor="product-size">Size</label>
+            {product.type === "matching-set" ? (
+              <>
+                <label>Dad Shirt Size</label>
 
-            <select
-              id="product-size"
-              value={selectedSize}
-              onChange={(event) => {
-                setSelectedSize(event.target.value);
-                setSizeError(false);
-              }}
-            >
-              <option value="">Select Size</option>
+                <select
+                  value={selectedDadSize}
+                  onChange={(e) => setSelectedDadSize(e.target.value)}
+                >
+                  <option value="">Select Dad Size</option>
 
-              {product.sizes?.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
+                  {product.dadSizes.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+
+                <label>Baby Onesie Size</label>
+
+                <select
+                  value={selectedKidSize}
+                  onChange={(e) => setSelectedKidSize(e.target.value)}
+                >
+                  <option value="">Select Baby Size</option>
+
+                  {product.kidSizes.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <label>Size</label>
+
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                >
+                  <option value="">Select Size</option>
+
+                  {product.sizes.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
           </>
         )}
 
@@ -87,15 +121,28 @@ function ProductPage({ addToCart }) {
         <button
           className="product-page__add-button"
           onClick={() => {
-            if (!selectedSize) {
-              setSizeError(true);
-              return;
-            }
+            if (product.type === "matching-set") {
+              if (!selectedDadSize || !selectedKidSize) {
+                setSizeError(true);
+                return;
+              }
 
-            addToCart({
-              ...product,
-              size: selectedSize,
-            });
+              addToCart({
+                ...product,
+                dadSize: selectedDadSize,
+                kidSize: selectedKidSize,
+              });
+            } else {
+              if (!selectedSize) {
+                setSizeError(true);
+                return;
+              }
+
+              addToCart({
+                ...product,
+                size: selectedSize,
+              });
+            }
 
             setAdded(true);
             setSizeError(false);

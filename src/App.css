@@ -811,8 +811,55 @@ html{
 }
 
 /* 
-
+ KIDS PAGE
 */
+.category-subtitle {
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.matching-set-card {
+  max-width: 700px;
+  margin: 30px auto 0;
+  text-align: center;
+}
+
+.matching-set-card__image {
+  width: 100%;
+  max-width: 650px;
+  height: auto;
+  display: block;
+  margin: 0 auto 24px;
+  border-radius: 12px;
+}
+
+.matching-set-card__info h3 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.matching-set-card__info p {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.matching-set-card__button {
+  display: inline-block;
+  padding: 14px 24px;
+  background: #111;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.matching-collection .featured__products {
+  justify-content: flex-start;
+  margin-top: 24px;
+}
+
+.matching-collection .product-card {
+  margin-left: 0;
+}
 
 /* 
   RESPONSIVENESS

@@ -69,6 +69,11 @@ function CheckoutPage({ cartItems, clearCart }) {
 
           <label>
             City
+            <input type="text" placeholder="City" required />
+          </label>
+
+          <label>
+            State
             <input type="text" placeholder="State" required />
           </label>
 

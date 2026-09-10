@@ -37,17 +37,33 @@ function App() {
   };
 
   const addToCart = (products) => {
-    const existingItem = cartItems.find(
-      (item) => item.name === products.name && item.size === products.size,
-    );
+    const existingItem = cartItems.find((item) => {
+      if (products.type === "matching-set") {
+        return (
+          item.name === products.name &&
+          item.dadSize === products.dadSize &&
+          item.kidSize === products.kidSize
+        );
+      }
+
+      return item.name === products.name && item.size === products.size;
+    });
 
     if (existingItem) {
       setCartItems(
-        cartItems.map((item) =>
-          item.name === products.name && item.size === products.size
+        cartItems.map((item) => {
+          if (products.type === "matching-set") {
+            return item.name === products.name &&
+              item.dadSize === products.dadSize &&
+              item.kidSize === products.kidSize
+              ? { ...item, quantity: item.quantity + 1 }
+              : item;
+          }
+
+          return item.name === products.name && item.size === products.size
             ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        ),
+            : item;
+        }),
       );
     } else {
       setCartItems([
@@ -150,7 +166,7 @@ function App() {
 
                   <div className="featured__products">
                     {products
-                      .filter((product) => product.type === "shirt")
+                      .filter((product) => [1, 3, 5].includes(product.id))
                       .map((product) => (
                         <ProductCard
                           key={product.id}

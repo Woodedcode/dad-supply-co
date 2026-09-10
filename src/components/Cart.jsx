@@ -21,7 +21,17 @@ function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
 
           <div>
             <p className="cart-item__para-name">{item.name}</p>
+
             {item.size && <p className="cart-item__size">Size: {item.size}</p>}
+
+            {item.dadSize && (
+              <p className="cart-item__size">Dad Size: {item.dadSize}</p>
+            )}
+
+            {item.kidSize && (
+              <p className="cart-item__size">Baby Size: {item.kidSize}</p>
+            )}
+
             <p className="cart-price">{item.price}</p>
             <div className="cart-item__controls">
               <button
