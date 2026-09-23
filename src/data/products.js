@@ -62,7 +62,7 @@ const products = [
         id: 6,
         name: "Dad Supply Checker Matching Set",
         price: "$48.00",
-        type: "matching-set",
+        type: ["matching-set", "shirt"],
         image: checkerMatchingSetRed,
         description: "A matching checkerboard set for Dad and his little sidekick.",
         dadSizes: ["S", "M", "L", "XL", "2XL"],

@@ -15,7 +15,7 @@ function MatchingPage() {
 
         <div className="featured__products">
           {products
-            .filter((product) => product.type === "matching-set")
+            .filter((product) => product.type.includes("matching-set"))
             .map((product) => (
               <ProductCard
                 key={product.id}

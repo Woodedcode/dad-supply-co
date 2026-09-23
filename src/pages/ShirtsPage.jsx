@@ -2,7 +2,7 @@ import ProductCard from "../components/ProductCard";
 import products from "../data/products";
 
 function ShirtsPage({ addToCart }) {
-  const shirts = products.filter((product) => product.type === "shirt");
+  const shirts = products.filter((product) => product.type.includes("shirt"));
 
   return (
     <section className="featured">
