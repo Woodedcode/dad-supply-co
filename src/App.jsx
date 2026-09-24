@@ -1,7 +1,7 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import DadSupplyLogo from "./assets/dad-supply-logo.png";
+import DadStandardLogo from "./assets/dad-standard-logo.png";
 import HeroImage from "./assets/hero-image.png";
 import ProductCard from "./components/ProductCard";
 import products from "./data/products.js";
@@ -104,8 +104,8 @@ function App() {
         <figure>
           <Link to="/">
             <img
-              src={DadSupplyLogo}
-              alt="Dad Supply Logo"
+              src={DadStandardLogo}
+              alt="Dad Standard Logo"
               className="header__logo"
             />
           </Link>
@@ -157,7 +157,7 @@ function App() {
                   </div>
 
                   <figure className="hero__image">
-                    <img src={HeroImage} alt="Dad Supply Co. Clothing" />
+                    <img src={HeroImage} alt="Dad Standard Co. Clothing" />
                   </figure>
                 </section>
 
@@ -179,9 +179,9 @@ function App() {
                   </div>
                 </section>
                 <section className="about" id="about">
-                  <h2>About Dad Supply Co.</h2>
+                  <h2>About Dad Standard Co.</h2>
                   <p>
-                    Dad Supply Co. is made for dads doing their best, cracking
+                    Dad Standard Co. is made for dads doing their best, cracking
                     terrible jokes, hauling too much stuff, and somehow keeping
                     it all together. <br />
                     <br />
