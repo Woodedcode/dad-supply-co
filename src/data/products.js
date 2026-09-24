@@ -7,6 +7,7 @@ import DadStandardJuniorBack from "../assets/dad-standard-junior-back.png";
 import DadStandardBabyFront from "../assets/dad-standard-baby-front.png";
 import DadStandardBabyBack from "../assets/dad-standard-baby-back.png";
 import checkerMatchingSetRed from "../assets/dad-standard-checker-matching-set-red.png";
+import axios from 'axios';
 
 const products = [
     {
