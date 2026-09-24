@@ -1,27 +1,27 @@
-import DadSupplyTee from "../assets/dad-supply-tee.png";
-import DadSupplyHat from "../assets/dad-supply-hat.png";
+import DadStandardTee from "../assets/dad-standard-tee.png";
+import DadStandardHat from "../assets/dad-standard-hat.png";
 import ImpastaFront from "../assets/impasta-front.png";
 import ImpastaBack from "../assets/impasta-back.png";
-import DadSupplyJuniorFront from "../assets/dad-supply-junior-front.png";
-import DadSupplyJuniorBack from "../assets/dad-supply-junior-back.png";
-import DadSupplyBabyFront from "../assets/dad-supply-baby-front.png";
-import DadSupplyBabyBack from "../assets/dad-supply-baby-back.png";
-import checkerMatchingSetRed from "../assets/dad-supply-checker-matching-set-red.png";
+import DadStandardJuniorFront from "../assets/dad-standard-junior-front.png";
+import DadStandardJuniorBack from "../assets/dad-standard-junior-back.png";
+import DadStandardBabyFront from "../assets/dad-standard-baby-front.png";
+import DadStandardBabyBack from "../assets/dad-standard-baby-back.png";
+import checkerMatchingSetRed from "../assets/dad-standard-checker-matching-set-red.png";
 
 const products = [
     {
         id:1,
-        name: "Dad Supply Tee",
+        name: "Dad Standard Tee",
         price: "$28.00",
-        image: DadSupplyTee,
+        image: DadStandardTee,
         type:"shirt",
         sizes: ["S", "M", "L", "XL", "2XL"]
     },
     {
         id:2,
-        name: "Dad Supply Hat",
+        name: "Dad Standard Hat",
         price: "$25.00",
-        image: DadSupplyHat,
+        image: DadStandardHat,
         type: "hat",
         sizes: ["One Size"]
     },
@@ -38,29 +38,29 @@ const products = [
 },
 {
         id: 4,
-        name: "Dad Supply Junior Tee",
+        name: "Dad Standard Junior Tee",
         price: "$22.00",
         type: "kid",
-        image: DadSupplyJuniorFront,
-        backImage: DadSupplyJuniorBack,
+        image: DadStandardJuniorFront,
+        backImage: DadStandardJuniorBack,
         description:
             "Official gear for the next generation of dad-joke professionals.",
         sizes: ["2T", "3T", "4T", "5T"],
 },
 {
         id: 5,
-        name: "Dad Supply Baby Onesie",
+        name: "Dad Standard Baby Onesie",
         price: "$22.00",
         type: "kid",
-        image: DadSupplyBabyFront,
-        backImage: DadSupplyBabyBack,
+        image: DadStandardBabyFront,
+        backImage: DadStandardBabyBack,
         description:
             "Official gear for the next generation of dad-joke professionals.",
         sizes: ["0-3M", "3-6M", "6-12M", "12-18M", "18-24M"],
 },
 {
         id: 6,
-        name: "Dad Supply Checker Matching Set",
+        name: "Dad Standard Checker Matching Set",
         price: "$48.00",
         type: ["matching-set", "shirt"],
         image: checkerMatchingSetRed,

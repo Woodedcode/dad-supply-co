@@ -148,8 +148,7 @@ function App() {
                   <div className="hero__content">
                     <h1>Built for Dad Life</h1>
                     <p>
-                      Quality gear for dads who take absolutely nothing too
-                      serious.
+                      Everyday gear for dads who set their own standard.
                     </p>
                     <Link to="/shirts" className="hero__shop-button">
                       Shop Now
@@ -183,7 +182,8 @@ function App() {
                   <p>
                     Dad Standard Co. is made for dads doing their best, cracking
                     terrible jokes, hauling too much stuff, and somehow keeping
-                    it all together. <br />
+                    it all together. 
+                    <br />
                     <br />
                     Comfortable gear for the everyday chaos of dad life.
                   </p>
