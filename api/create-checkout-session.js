@@ -20,7 +20,6 @@ export default async function handler(req, res) {
   quantity: item.quantity,
   }));
 const session = await stripe.checkout.sessions.create({
-  payment_method_types: ["card"],
   mode: "payment",
   line_items: lineItems,
   success_url: "http://localhost:5173/checkout?success=true",
