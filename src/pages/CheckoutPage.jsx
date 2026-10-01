@@ -19,6 +19,9 @@ function CheckoutPage({ cartItems, clearCart }) {
       body: JSON.stringify({ cartItems }),
     });
     const data = await response.json();
+    if (data.url) {
+  window.location.href = data.url;
+}git 
 
     if (data.url) {
   window.location.href = data.url;
