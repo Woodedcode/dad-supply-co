@@ -20,7 +20,9 @@ function CheckoutPage({ cartItems, clearCart }) {
     });
     const data = await response.json();
 
-    
+    if (data.url) {
+  window.location.href = data.url;
+}
   };
 
   if (orderPlaced) {
