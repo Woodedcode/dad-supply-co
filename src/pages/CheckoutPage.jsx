@@ -8,11 +8,19 @@ function CheckoutPage({ cartItems, clearCart }) {
     return total + parseFloat(item.price.replace("$", "")) * item.quantity;
   }, 0);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    clearCart();
-    setOrderPlaced(true);
+    const response = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cartItems }),
+    });
+    const data = await response.json();
+
+    
   };
 
   if (orderPlaced) {
