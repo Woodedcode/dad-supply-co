@@ -8,23 +8,21 @@ export default async function handler(req, res) {
   }
   const { cartItems } = req.body;
   const lineItems = cartItems.map((item) => ({
-  price_data: {
-    currency: "usd",
-    product_data: {
-      name: item.name,
+    price_data: {
+      currency: "usd",
+      product_data: {
+        name: item.name,
+      },
+      unit_amount: Math.round(parseFloat(item.price.replace("$", "")) * 100),
     },
-    unit_amount: Math.round(
-      parseFloat(item.price.replace("$", "")) * 100
-    ),
-  },
-  quantity: item.quantity,
+    quantity: item.quantity,
   }));
-const session = await stripe.checkout.sessions.create({
-  mode: "payment",
-  line_items: lineItems,
-  success_url: "http://localhost:5173/checkout?success=true",
-  cancel_url: "http://localhost:5173/cart",
-});
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    line_items: lineItems,
+    success_url: "https://www.dadstandardco.com/checkout?success=true",
+    cancel_url: "https://www.dadstandardco.com/cart",
+  });
 
-res.status(200).json({ url: session.url });
+  res.status(200).json({ url: session.url });
 }
