@@ -1,11 +1,14 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch("https://api.printify.com/v1/shops.json", {
-      headers: {
-        Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
-        "User-Agent": "Dad Standard Co",
+    const response = await fetch(
+      "https://api.printify.com/v1/shops/29064058/products.json",
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
+          "User-Agent": "Dad Standard Co",
+        },
       },
-    });
+    );
 
     const data = await response.json();
 
@@ -17,7 +20,6 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({
       error: "Could not connect to Printify",
-      
     });
   }
 }
