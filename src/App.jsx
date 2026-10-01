@@ -12,6 +12,7 @@ import ShirtsPage from "./pages/ShirtsPage.jsx";
 import HatsPage from "./pages/HatsPage.jsx";
 import MatchingPage from "./pages/MatchingPage";
 import KidsPage from "./pages/KidsPage";
+import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 
 function App() {
   const [cartItems, setCartItems] = useState(() => {
@@ -147,9 +148,7 @@ function App() {
                 <section className="hero">
                   <div className="hero__content">
                     <h1>Built for Dad Life</h1>
-                    <p>
-                      Everyday gear for dads who set their own standard.
-                    </p>
+                    <p>Everyday gear for dads who set their own standard.</p>
                     <Link to="/shirts" className="hero__shop-button">
                       Shop Now
                     </Link>
@@ -182,7 +181,7 @@ function App() {
                   <p>
                     Dad Standard Co. is made for dads doing their best, cracking
                     terrible jokes, hauling too much stuff, and somehow keeping
-                    it all together. 
+                    it all together.
                     <br />
                     <br />
                     Comfortable gear for the everyday chaos of dad life.
@@ -221,6 +220,10 @@ function App() {
             element={
               <CheckoutPage cartItems={cartItems} clearCart={clearCart} />
             }
+          />
+          <Route
+            path="/order-confirmation"
+            element={<OrderConfirmationPage clearCart={clearCart} />}
           />
         </Routes>
       </main>

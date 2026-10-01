@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: lineItems,
-    success_url: "https://www.dadstandardco.com/checkout?success=true",
+    success_url: "https://www.dadstandardco.com/order-confirmation",
     cancel_url: "https://www.dadstandardco.com/cart",
   });
 
