@@ -1,0 +1,9 @@
+export const PRINTIFY_PRODUCT_ID = "6ab5453141b86e214f0f51c2";
+
+export const PRINTIFY_VARIANTS = {
+  S: 103886,
+  M: 103887,
+  L: 103888,
+  XL: 103889,
+  "2XL": 103890,
+};
