@@ -21,9 +21,9 @@ function OrderConfirmationPage({ clearCart }) {
           Your dad gear is secured. Mission accomplished.
         </p>
 
-        <Link to="/" className="order-confirmation__link">
+        <a href="/" className="order-confirmation__link">
           Continue Shopping
-        </Link>
+        </a>
       </div>
     </section>
   );
