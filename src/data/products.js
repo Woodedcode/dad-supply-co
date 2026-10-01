@@ -1,11 +1,10 @@
-import DadStandardTee from "../assets/dad-supply-tee.png"
 
 const products = [
     {
         id:1,
         name: "Dad Standard Tee",
         price: "$28.00",
-        image: DadStandardTee,
+        image: "https://images.printify.com/mockup/6ab5453141b86e214f0f51c2/103888/100285/1a0d41f7ec8.jpg?s=608",
         type:"shirt",
         sizes: ["S", "M", "L", "XL", "2XL"]
     },
