@@ -43,7 +43,14 @@ export default async function handler(req, res) {
       expand: ["data.price.product"],
     });
 
-    console.log("Purchased line items:", lineItems.data);
+    console.log(
+      "Purchased item metadata:",
+      lineItems.data.map((item) => ({
+        name: item.description,
+        quantity: item.quantity,
+        metadata: item.price?.product?.metadata,
+      })),
+    );
 
     if (!event.livemode) {
       console.log("Sandbox payment — skipping Printify fulfillment");
