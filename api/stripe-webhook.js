@@ -35,7 +35,18 @@ export default async function handler(req, res) {
   }
 
   if (event.type === "checkout.session.completed") {
-    console.log("Stripe checkout completed:", event.data.object.id);
+    const session = event.data.object;
+
+    console.log("Stripe checkout completed:", session.id);
+
+    if (!event.livemode) {
+      console.log("Sandbox payment — skipping Printify fulfillment");
+
+      return res.status(200).json({
+        received: true,
+        fulfillment: "skipped_sandbox",
+      });
+    }
   }
 
   return res.status(200).json({
