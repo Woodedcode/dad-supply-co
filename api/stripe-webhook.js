@@ -1,9 +1,6 @@
 import Stripe from "stripe";
 import getRawBody from "raw-body";
-import {
-  PRINTIFY_PRODUCT_ID,
-  PRINTIFY_VARIANTS,
-} from "./printify-config.js";
+import { PRINTIFY_PRODUCT_ID, PRINTIFY_VARIANTS } from "./printify-config.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -31,10 +28,7 @@ export default async function handler(req, res) {
       process.env.STRIPE_WEBHOOK_SECRET,
     );
   } catch (error) {
-    console.error(
-      "Webhook signature verification failed:",
-      error.message,
-    );
+    console.error("Webhook signature verification failed:", error.message);
 
     return res.status(400).json({
       error: "Webhook signature verification failed",
@@ -56,12 +50,9 @@ export default async function handler(req, res) {
       });
     }
 
-    const lineItems = await stripe.checkout.sessions.listLineItems(
-      session.id,
-      {
-        expand: ["data.price.product"],
-      },
-    );
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ["data.price.product"],
+    });
 
     console.log(
       "Purchased item metadata:",
@@ -71,10 +62,22 @@ export default async function handler(req, res) {
         metadata: item.price?.product?.metadata,
       })),
     );
+    const allowedSizes = ["S", "M", "L", "XL", "2XL"];
 
     const printifyItems = lineItems.data.map((item) => {
       const metadata = item.price?.product?.metadata;
       const variantId = PRINTIFY_VARIANTS[metadata?.size];
+
+      const quantity = Number(item.quantity);
+
+      if (
+        metadata?.productKey !== "dad-standard-tee" ||
+        !allowedSizes.includes(metadata?.size) ||
+        !Number.isInteger(quantity) ||
+        quantity < 1
+      ) {
+        throw new Error("Invalid product or size for Printify fulfillment");
+      }
 
       return {
         product_id: PRINTIFY_PRODUCT_ID,
@@ -85,16 +88,11 @@ export default async function handler(req, res) {
 
     console.log("Printify items prepared:", printifyItems);
 
-    const shipping =
-      session.collected_information?.shipping_details;
+    const shipping = session.collected_information?.shipping_details;
 
     const customer = session.customer_details;
 
-    const nameParts = (
-      shipping?.name ||
-      customer?.name ||
-      ""
-    )
+    const nameParts = (shipping?.name || customer?.name || "")
       .trim()
       .split(" ");
 
@@ -126,9 +124,7 @@ export default async function handler(req, res) {
 
     // Never create Printify orders from Stripe sandbox payments.
     if (!event.livemode) {
-      console.log(
-        "Sandbox payment — skipping Printify fulfillment",
-      );
+      console.log("Sandbox payment — skipping Printify fulfillment");
 
       return res.status(200).json({
         received: true,
@@ -138,9 +134,7 @@ export default async function handler(req, res) {
 
     // Second safety lock.
     // This must explicitly equal "true" in Vercel.
-    if (
-      process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true"
-    ) {
+    if (process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true") {
       console.log("Printify fulfillment disabled");
 
       return res.status(200).json({
@@ -166,10 +160,7 @@ export default async function handler(req, res) {
     const printifyResult = await printifyResponse.json();
 
     if (!printifyResponse.ok) {
-      console.error(
-        "Printify order creation failed:",
-        printifyResult,
-      );
+      console.error("Printify order creation failed:", printifyResult);
 
       return res.status(500).json({
         error: "Printify order creation failed",
