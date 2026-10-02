@@ -10,6 +10,9 @@ function KidsPage({ addToCart }) {
       <p className="category-subtitle">
         Little gear for the next generation of Dad-joke professionals.
       </p>
+      <br />
+      <br />
+      <h3>COMING SOON...</h3>
 
       <div className="featured__products">
         {kids.map((product) => (

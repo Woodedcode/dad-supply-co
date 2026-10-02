@@ -11,7 +11,9 @@ function MatchingPage() {
       </p>
 
       <div className="matching-collection">
-        <h2>The Checker Collection</h2>
+        <br/>
+        <br/>
+        <h3>COMING SOON...</h3>
 
         <div className="featured__products">
           {products

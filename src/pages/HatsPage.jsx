@@ -7,6 +7,9 @@ function HatsPage({ addToCart }) {
   return (
     <section className="featured">
       <h1>Hats</h1>
+      <br />
+      <br />
+      <h3>COMING SOON...</h3>
 
       <div className="featured__products">
         {hats.map((product) => (
