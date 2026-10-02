@@ -18,7 +18,7 @@ export default async function handler(req, res) {
           size: item.size,
         },
       },
-      unit_amount: Math.round(parseFloat(item.price.replace("$", "")) * 100),
+      unit_amount: 2800,
     },
     quantity: item.quantity,
   }));
