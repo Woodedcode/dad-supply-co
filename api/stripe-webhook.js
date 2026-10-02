@@ -86,7 +86,11 @@ export default async function handler(req, res) {
       };
     });
 
-    console.log("Printify items prepared:", printifyItems);
+    console.log("Printify order prepared:", {
+      external_id: printifyOrder.external_id,
+      line_items: printifyOrder.line_items,
+      shipping_method: printifyOrder.shipping_method,
+    });
 
     const shipping = session.collected_information?.shipping_details;
 
