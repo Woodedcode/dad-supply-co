@@ -66,6 +66,37 @@ export default async function handler(req, res) {
 
     console.log("Printify items prepared:", printifyItems);
 
+    const shipping = session.collected_information?.shipping_details;
+    const customer = session.customer_details;
+
+    const nameParts = (shipping?.name || customer?.name || "")
+      .trim()
+      .split(" ");
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    const printifyOrder = {
+      external_id: session.id,
+      label: `Dad Standard - ${session.id}`,
+      line_items: printifyItems,
+      shipping_method: 1,
+      send_shipping_notification: false,
+      address_to: {
+        first_name: firstName,
+        last_name: lastName,
+        email: customer?.email || "",
+        phone: customer?.phone || "",
+        country: shipping?.address?.country || "",
+        region: shipping?.address?.state || "",
+        address1: shipping?.address?.line1 || "",
+        address2: shipping?.address?.line2 || "",
+        city: shipping?.address?.city || "",
+        zip: shipping?.address?.postal_code || "",
+      },
+    };
+
+    console.log("Printify order prepared:", printifyOrder);
+
     if (!event.livemode) {
       console.log("Sandbox payment — skipping Printify fulfillment");
 
