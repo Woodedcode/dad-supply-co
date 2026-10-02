@@ -40,6 +40,15 @@ export default async function handler(req, res) {
 
     console.log("Stripe checkout completed:", session.id);
 
+    if (session.payment_status !== "paid") {
+  console.log("Payment not completed — skipping fulfillment");
+
+  return res.status(200).json({
+    received: true,
+    fulfillment: "payment_not_completed",
+  });
+}
+
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
       expand: ["data.price.product"],
     });
@@ -132,8 +141,15 @@ export default async function handler(req, res) {
 
     const printifyResult = await printifyResponse.json();
 
-    console.log("Printify order response:", printifyResult);
-  }
+if (!printifyResponse.ok) {
+  console.error("Printify order creation failed:", printifyResult);
+
+  return res.status(500).json({
+    error: "Printify order creation failed",
+  });
+}
+
+console.log("Printify order created:", printifyResult);
 
   return res.status(200).json({
     received: true,
