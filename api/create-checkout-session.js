@@ -13,6 +13,10 @@ export default async function handler(req, res) {
       product_data: {
         name: item.name,
         description: `Size: ${item.size}`,
+        metadata: {
+          productKey: "dad-standard-tee",
+          size: item.size,
+        },
       },
       unit_amount: Math.round(parseFloat(item.price.replace("$", "")) * 100),
     },
