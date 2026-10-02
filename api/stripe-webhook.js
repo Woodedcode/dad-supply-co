@@ -47,15 +47,15 @@ export default async function handler(req, res) {
         fulfillment: "skipped_sandbox",
       });
     }
-  }
 
-  if (process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true") {
-    console.log("Printify fulfillment disabled");
+    if (process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true") {
+      console.log("Printify fulfillment disabled");
 
-    return res.status(200).json({
-      received: true,
-      fulfillment: "disabled",
-    });
+      return res.status(200).json({
+        received: true,
+        fulfillment: "disabled",
+      });
+    }
   }
 
   return res.status(200).json({
