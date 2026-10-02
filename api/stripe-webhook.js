@@ -49,6 +49,15 @@ export default async function handler(req, res) {
     }
   }
 
+  if (process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true") {
+    console.log("Printify fulfillment disabled");
+
+    return res.status(200).json({
+      received: true,
+      fulfillment: "disabled",
+    });
+  }
+
   return res.status(200).json({
     received: true,
   });
