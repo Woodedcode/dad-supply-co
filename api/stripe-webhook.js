@@ -1,9 +1,6 @@
 import Stripe from "stripe";
 import getRawBody from "raw-body";
-import {
-  PRINTIFY_PRODUCT_ID,
-  PRINTIFY_VARIANTS,
-} from "./printify-config.js";
+import { PRINTIFY_PRODUCT_ID, PRINTIFY_VARIANTS } from "./printify-config.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -55,6 +52,19 @@ export default async function handler(req, res) {
         metadata: item.price?.product?.metadata,
       })),
     );
+
+    const printifyItems = lineItems.data.map((item) => {
+      const metadata = item.price?.product?.metadata;
+      const variantId = PRINTIFY_VARIANTS[metadata?.size];
+
+      return {
+        product_id: PRINTIFY_PRODUCT_ID,
+        variant_id: variantId,
+        quantity: item.quantity,
+      };
+    });
+
+    console.log("Printify items prepared:", printifyItems);
 
     if (!event.livemode) {
       console.log("Sandbox payment — skipping Printify fulfillment");
