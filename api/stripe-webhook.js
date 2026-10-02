@@ -1,5 +1,9 @@
 import Stripe from "stripe";
 import getRawBody from "raw-body";
+import {
+  PRINTIFY_PRODUCT_ID,
+  PRINTIFY_VARIANTS,
+} from "./printify-config.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
