@@ -56,6 +56,12 @@ export default async function handler(req, res) {
         fulfillment: "disabled",
       });
     }
+
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ["data.price.product"],
+    });
+
+    console.log("Purchased line items:", lineItems.data);
   }
 
   return res.status(200).json({
