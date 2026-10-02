@@ -168,7 +168,7 @@ export default async function handler(req, res) {
     }
 
     const printifyResponse = await fetch(
-      "https://api.printify.com/v1/shops/29064058/orders.json",
+      `https://api.printify.com/v1/shops/29064058/orders.json?limit=100`,
       {
         method: "POST",
 
