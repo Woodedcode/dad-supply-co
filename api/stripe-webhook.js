@@ -143,6 +143,30 @@ export default async function handler(req, res) {
       });
     }
 
+    const existingOrdersResponse = await fetch(
+      `https://api.printify.com/v1/shops/29064058/orders.json`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
+        },
+      },
+    );
+
+    const existingOrders = await existingOrdersResponse.json();
+
+    const duplicateOrder = existingOrders.data?.find(
+      (order) => order.external_id === session.id,
+    );
+
+    if (duplicateOrder) {
+      console.log("Printify order already exists — skipping duplicate");
+
+      return res.status(200).json({
+        received: true,
+        fulfillment: "duplicate_skipped",
+      });
+    }
+
     const printifyResponse = await fetch(
       "https://api.printify.com/v1/shops/29064058/orders.json",
       {
