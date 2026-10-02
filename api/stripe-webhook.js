@@ -72,6 +72,7 @@ export default async function handler(req, res) {
     const nameParts = (shipping?.name || customer?.name || "")
       .trim()
       .split(" ");
+
     const firstName = nameParts[0] || "";
     const lastName = nameParts.slice(1).join(" ") || "";
 
@@ -97,6 +98,7 @@ export default async function handler(req, res) {
 
     console.log("Printify order prepared:", printifyOrder);
 
+    // Never create Printify orders from Stripe sandbox payments.
     if (!event.livemode) {
       console.log("Sandbox payment — skipping Printify fulfillment");
 
@@ -106,6 +108,7 @@ export default async function handler(req, res) {
       });
     }
 
+    // Second safety lock. Must explicitly be enabled in Vercel.
     if (process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true") {
       console.log("Printify fulfillment disabled");
 
@@ -114,6 +117,22 @@ export default async function handler(req, res) {
         fulfillment: "disabled",
       });
     }
+
+    const printifyResponse = await fetch(
+      "https://api.printify.com/v1/shops/29064058/orders.json",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(printifyOrder),
+      },
+    );
+
+    const printifyResult = await printifyResponse.json();
+
+    console.log("Printify order response:", printifyResult);
   }
 
   return res.status(200).json({
