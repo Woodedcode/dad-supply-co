@@ -1,8 +1,3 @@
-import {
-  PRINTIFY_PRODUCT_ID,
-  PRINTIFY_VARIANTS,
-} from "./printify-config.js";
-
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({
@@ -10,9 +5,17 @@ export default async function handler(req, res) {
     });
   }
 
+  const { productId } = req.query;
+
+  if (!productId) {
+    return res.status(400).json({
+      error: "Missing Printify product ID",
+    });
+  }
+
   try {
     const response = await fetch(
-      "https://api.printify.com/v1/shops/29064058/products.json",
+      `https://api.printify.com/v1/shops/29064058/products/${productId}.json`,
       {
         headers: {
           Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
@@ -23,49 +26,117 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error: "Could not fetch Printify products",
+        error: "Could not fetch Printify product",
       });
     }
 
-    const data = await response.json();
+    const product = await response.json();
 
-    const product = data.data?.find(
-      (item) => item.id === PRINTIFY_PRODUCT_ID,
-    );
-
-    if (!product) {
-      return res.status(404).json({
-        error: "Dad Standard Tee not found",
-      });
-    }
+    /*
+      -------------------------
+      LIVE SIZE PRICES
+      -------------------------
+    */
 
     const prices = {};
 
-    for (const [size, variantId] of Object.entries(
-      PRINTIFY_VARIANTS,
-    )) {
-      const variant = product.variants?.find(
-        (item) => item.id === variantId,
-      );
+    const sizeOption = product.options?.find(
+      (option) =>
+        option.type === "size" ||
+        option.name?.toLowerCase().includes("size"),
+    );
 
-      if (variant) {
-        prices[size] = variant.price / 100;
-      }
+    const sizeLookup = {};
+
+    if (sizeOption) {
+      sizeOption.values.forEach((value) => {
+        sizeLookup[value.id] = value.title;
+      });
     }
+
+    product.variants
+      ?.filter((variant) => variant.is_enabled !== false)
+      .forEach((variant) => {
+        const sizeId = variant.options?.find(
+          (optionId) => sizeLookup[optionId],
+        );
+
+        const size = sizeLookup[sizeId];
+
+        if (!size) {
+          return;
+        }
+
+        const variantPrice = variant.price / 100;
+
+        if (
+          prices[size] === undefined ||
+          variantPrice < prices[size]
+        ) {
+          prices[size] = variantPrice;
+        }
+      });
+
+    /*
+      -------------------------
+      PRINTIFY MOCKUP IMAGES
+      -------------------------
+    */
+
+    const images = product.images || [];
+
+    const frontImage =
+      images.find(
+        (image) =>
+          image.position === "front" &&
+          image.is_default,
+      )?.src ||
+      images.find(
+        (image) => image.position === "front",
+      )?.src ||
+      images.find(
+        (image) => image.is_default,
+      )?.src ||
+      images[0]?.src ||
+      null;
+
+    const backImage =
+      images.find(
+        (image) =>
+          image.position === "back" &&
+          image.is_default,
+      )?.src ||
+      images.find(
+        (image) => image.position === "back",
+      )?.src ||
+      null;
 
     const priceValues = Object.values(prices);
 
     return res.status(200).json({
       id: product.id,
-      name: "Dad Standard Tee",
+
+      name: product.title,
+
       price:
         priceValues.length > 0
           ? Math.min(...priceValues)
           : null,
+
       prices,
+
+      frontImage,
+
+      backImage,
+
+      images: images.map((image) => ({
+        src: image.src,
+        position: image.position,
+        isDefault: image.is_default,
+      })),
     });
   } catch (error) {
-    console.error("Printify products error:", error);
+    console.error("Printify product error:", error);
 
     return res.status(500).json({
       error: "Could not connect to Printify",
