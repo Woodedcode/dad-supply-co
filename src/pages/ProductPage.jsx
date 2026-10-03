@@ -1,26 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import products from "../data/products";
 
 function ProductPage({ addToCart }) {
   const { id } = useParams();
 
-  const product = products.find((product) => String(product.id) === id);
+  const product = products.find(
+    (product) => String(product.id) === id,
+  );
 
   const [selectedImage, setSelectedImage] = useState(product?.image);
+
   const [selectedSize, setSelectedSize] = useState(
-    product?.sizes?.length === 1 && product.sizes[0] === "One Size"
+    product?.sizes?.length === 1 &&
+      product.sizes[0] === "One Size"
       ? "One Size"
       : "",
   );
+
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
   const [selectedDadSize, setSelectedDadSize] = useState("");
   const [selectedKidSize, setSelectedKidSize] = useState("");
 
+  const [printifyPrice, setPrintifyPrice] = useState(null);
+  const [printifyPrices, setPrintifyPrices] = useState({});
+
+  useEffect(() => {
+    async function getPrintifyPrice() {
+      try {
+        const response = await fetch("/api/printify-products");
+
+        if (!response.ok) {
+          throw new Error("Could not load Printify pricing");
+        }
+
+        const data = await response.json();
+
+        setPrintifyPrice(data.price);
+        setPrintifyPrices(data.prices || {});
+      } catch (error) {
+        console.error("Price fetch failed:", error);
+      }
+    }
+
+    getPrintifyPrice();
+  }, []);
+
   if (!product) {
     return <h1>Product not found</h1>;
   }
+
+  const currentPrice =
+    selectedSize && printifyPrices[selectedSize]
+      ? printifyPrices[selectedSize]
+      : printifyPrice;
 
   return (
     <main className="product-page">
@@ -28,11 +62,19 @@ function ProductPage({ addToCart }) {
         {product.backImage && (
           <div className="product-page__thumbnails">
             <button onClick={() => setSelectedImage(product.image)}>
-              <img src={product.image} alt={`${product.name} front`} />
+              <img
+                src={product.image}
+                alt={`${product.name} front`}
+              />
             </button>
 
-            <button onClick={() => setSelectedImage(product.backImage)}>
-              <img src={product.backImage} alt={`${product.name} back`} />
+            <button
+              onClick={() => setSelectedImage(product.backImage)}
+            >
+              <img
+                src={product.backImage}
+                alt={`${product.name} back`}
+              />
             </button>
           </div>
         )}
@@ -49,13 +91,19 @@ function ProductPage({ addToCart }) {
       <div className="product-page__info">
         <h1>{product.name}</h1>
 
-        <p className="product-page__price">{product.price}</p>
+        <p className="product-page__price">
+          {currentPrice !== null
+            ? `$${currentPrice.toFixed(2)}`
+            : "Loading price..."}
+        </p>
 
         {product.sizes?.[0] === "One Size" && (
           <p className="product-page__one-size">One Size</p>
         )}
 
-        <p className="product-page__description">{product.description}</p>
+        <p className="product-page__description">
+          {product.description}
+        </p>
 
         {product.sizes?.[0] !== "One Size" && (
           <>
@@ -65,7 +113,9 @@ function ProductPage({ addToCart }) {
 
                 <select
                   value={selectedDadSize}
-                  onChange={(e) => setSelectedDadSize(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedDadSize(e.target.value)
+                  }
                 >
                   <option value="">Select Dad Size</option>
 
@@ -80,7 +130,9 @@ function ProductPage({ addToCart }) {
 
                 <select
                   value={selectedKidSize}
-                  onChange={(e) => setSelectedKidSize(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedKidSize(e.target.value)
+                  }
                 >
                   <option value="">Select Baby Size</option>
 
@@ -97,7 +149,10 @@ function ProductPage({ addToCart }) {
 
                 <select
                   value={selectedSize}
-                  onChange={(e) => setSelectedSize(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedSize(e.target.value);
+                    setSizeError(false);
+                  }}
                 >
                   <option value="">Select Size</option>
 
@@ -141,6 +196,7 @@ function ProductPage({ addToCart }) {
               addToCart({
                 ...product,
                 size: selectedSize,
+                price: printifyPrices[selectedSize],
               });
             }
 
