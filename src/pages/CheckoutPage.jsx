@@ -1,62 +1,51 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
-function CheckoutPage({ cartItems, clearCart }) {
-  const [orderPlaced, setOrderPlaced] = useState(false);
+function CheckoutPage({ cartItems }) {
+  const getNumericPrice = (price) => {
+    if (typeof price === "number") {
+      return price;
+    }
+
+    return parseFloat(String(price).replace("$", "")) || 0;
+  };
+
+  const formatPrice = (price) => {
+    return `$${getNumericPrice(price).toFixed(2)}`;
+  };
 
   const subtotal = cartItems.reduce((total, item) => {
-    return total + parseFloat(item.price.replace("$", "")) * item.quantity;
+    return total + getNumericPrice(item.price) * item.quantity;
   }, 0);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const response = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ cartItems }),
-    });
-    const data = await response.json();
-    if (data.url) {
-  window.location.href = data.url;
-}
+    try {
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ cartItems }),
+      });
 
-    if (data.url) {
-  window.location.href = data.url;
-}
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+    }
   };
 
-  if (orderPlaced) {
-    return (
-      <section className="checkout-page">
-        <div className="checkout-confirmation">
-          <p className="order-confirmation__eyebrow">ORDER CONFIRMED</p>
-
-          <h1>Dad Duty Complete</h1>
-
-          <p className="order-confirmation__message">
-            Your order have been placed successfully.
-          </p>
-
-          <p className="order-confirmation__subtext">
-            Your dad gear secured. Mission accomplished.
-          </p>
-
-          <Link to="/" className="order-confirmation__link">
-            Continue Shopping
-          </Link>
-        </div>
-      </section>
-    );
-  }
   return (
     <section className="checkout-page">
       <div className="checkout-page__header">
         <p>ALMOST THERE</p>
         <h1>Checkout</h1>
       </div>
+
       <div className="checkout-layout">
         <form
           id="checkout-form"
@@ -67,54 +56,102 @@ function CheckoutPage({ cartItems, clearCart }) {
 
           <label>
             Email
-            <input type="email" placeholder="Dad@email.com" required />
+            <input
+              type="email"
+              placeholder="Dad@email.com"
+              required
+            />
           </label>
 
           <label>
             Full Name
-            <input type="text" placeholder="John Dad" required />
+            <input
+              type="text"
+              placeholder="John Dad"
+              required
+            />
           </label>
 
           <label>
             Address
-            <input type="text" placeholder="123 Dad Street" required />
+            <input
+              type="text"
+              placeholder="123 Dad Street"
+              required
+            />
           </label>
 
           <label>
             City
-            <input type="text" placeholder="City" required />
+            <input
+              type="text"
+              placeholder="City"
+              required
+            />
           </label>
 
           <label>
             State
-            <input type="text" placeholder="State" required />
+            <input
+              type="text"
+              placeholder="State"
+              required
+            />
           </label>
 
           <label>
             Zip Code
-            <input type="text" placeholder="75000" required />
+            <input
+              type="text"
+              placeholder="75000"
+              required
+            />
           </label>
-          <button type="submit" className="checkout-summary__button">
+
+          <button
+            type="submit"
+            className="checkout-summary__button"
+          >
             Place Order
           </button>
         </form>
 
         <aside className="checkout-summary">
           <h2>Order Summary</h2>
+
           {cartItems.map((item, index) => (
-            <div className="checkout-summary__item" key={index}>
+            <div
+              className="checkout-summary__item"
+              key={index}
+            >
               <p>{item.name}</p>
 
-              {item.size && <p>Size: {item.size}</p>}
+              {item.size && (
+                <p>Size: {item.size}</p>
+              )}
+
+              {item.dadSize && (
+                <p>Dad Size: {item.dadSize}</p>
+              )}
+
+              {item.kidSize && (
+                <p>Baby Size: {item.kidSize}</p>
+              )}
 
               <p>Qty: {item.quantity}</p>
-              <p>{item.price}</p>
+
+              <p>{formatPrice(item.price)}</p>
             </div>
           ))}
+
           <div className="checkout-summary__total">
             <p>Subtotal</p>
             <p>${subtotal.toFixed(2)}</p>
           </div>
+
+          <Link to="/cart">
+            Back to Cart
+          </Link>
         </aside>
       </div>
     </section>

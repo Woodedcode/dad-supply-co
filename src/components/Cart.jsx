@@ -1,8 +1,20 @@
 import { Link } from "react-router-dom";
 
 function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
+  const getNumericPrice = (price) => {
+    if (typeof price === "number") {
+      return price;
+    }
+
+    return parseFloat(String(price).replace("$", "")) || 0;
+  };
+
+  const formatPrice = (price) => {
+    return `$${getNumericPrice(price).toFixed(2)}`;
+  };
+
   const subtotal = cartItems.reduce((total, item) => {
-    return total + parseFloat(item.price.replace("$", "")) * item.quantity;
+    return total + getNumericPrice(item.price) * item.quantity;
   }, 0);
 
   return (
@@ -10,29 +22,42 @@ function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
       {cartItems.length === 0 && (
         <>
           <p className="cart-empty">Your cart is empty.</p>
+
           <Link to="/" className="cart-empty__link">
             Continue Shopping
           </Link>
         </>
       )}
+
       {cartItems.map((item, index) => (
         <div className="cart-item" key={index}>
-          <img src={item.image} alt={item.name} className="cart-item__image" />
+          <img
+            src={item.image}
+            alt={item.name}
+            className="cart-item__image"
+          />
 
           <div>
             <p className="cart-item__para-name">{item.name}</p>
 
-            {item.size && <p className="cart-item__size">Size: {item.size}</p>}
+            {item.size && (
+              <p className="cart-item__size">Size: {item.size}</p>
+            )}
 
             {item.dadSize && (
               <p className="cart-item__size">Dad Size: {item.dadSize}</p>
             )}
 
             {item.kidSize && (
-              <p className="cart-item__size">Baby Size: {item.kidSize}</p>
+              <p className="cart-item__size">
+                Baby Size: {item.kidSize}
+              </p>
             )}
 
-            <p className="cart-price">{item.price}</p>
+            <p className="cart-price">
+              {formatPrice(item.price)}
+            </p>
+
             <div className="cart-item__controls">
               <button
                 className="cart-item__quantity"
@@ -40,13 +65,16 @@ function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
               >
                 -
               </button>
+
               <p className="cart-quantity">{item.quantity}</p>
+
               <button
                 className="cart-item__quantity"
                 onClick={() => increaseQuantity(index)}
               >
                 +
               </button>
+
               <button
                 className="cart-item__remove-link"
                 onClick={() => removeItem(index)}
@@ -57,12 +85,14 @@ function Cart({ cartItems, removeFromCart, increaseQuantity, removeItem }) {
           </div>
         </div>
       ))}
+
       {cartItems.length > 0 && (
         <div className="cart-summary">
           <div className="cart-summary__total">
             <p>Subtotal</p>
             <p>${subtotal.toFixed(2)}</p>
           </div>
+
           <Link to="/checkout" className="cart-summary__checkout">
             Checkout
           </Link>
