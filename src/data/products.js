@@ -2,8 +2,9 @@ const products = [
   {
     id: 1,
     name: "Dad Standard Tee",
-    price: null,
-    image:    "https://images.printify.com/mockup/6ab5453141b86e214f0f51c2/103888/100285/1a0d41f7ec8.jpg?s=608",
+    printifyProductId: "6ab5453141b86e214f0f51c2",
+    image:
+"https://images.printify.com/mockup/6ab5453141b86e214f0f51c2/103888/100285/1a0d41f7ec8.jpg?s=608",
     type: "shirt",
     sizes: ["S", "M", "L", "XL", "2XL"],
     description:
@@ -33,10 +34,11 @@ const products = [
       "Do not dry clean",
     ],
   },
+
   {
     id: 2,
-    name: "The I'm-Pasta Tee",
-    price: null,
+    name: "The Im-Pasta Tee",
+    printifyProductId: "6ac16b360c4065ff510ba05d",
     image:
 "https://images.printify.com/mockup/6ac16b360c4065ff510ba05d/38192/97992/unisex-softstyle-t-shirt.jpg?camera_label=front&t=1791061608600&s=500",
     backImage:
@@ -44,9 +46,8 @@ const products = [
     type: "shirt",
     sizes: ["S", "M", "L", "XL", "2XL"],
     description:
-      "A dad joke you can wear. The I'm-Pasta Tee brings peak dad humor to an everyday tee, featuring the Dad Standard logo up front and the full fake-noodle punchline on the back.",
-    tagline:
-      "Certified al dente dad humor.",
+      "A dad joke you can wear. The Im-Pasta Tee brings peak dad humor to an everyday tee, featuring the Dad Standard logo up front and the full fake-noodle punchline on the back.",
+    tagline: "Certified al dente dad humor.",
     fabricIntro:
       "Soft, comfortable, and built for everyday dad duty.",
     fabricDetails: [
@@ -56,7 +57,7 @@ const products = [
       "Shoulder-to-shoulder taping",
       "Double-stitched hems for durability",
       "Dad Standard chest logo",
-      "Large I'm-Pasta back graphic",
+      "Large Im-Pasta back graphic",
     ],
     careIntro:
       "Keep your dad jokes looking fresh.",
