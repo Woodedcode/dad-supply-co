@@ -7,57 +7,193 @@ function ProductPage({ addToCart }) {
   const { id } = useParams();
 
   const product = products.find(
-    (product) => String(product.id) === id,
+    (product) => String(product.id) === id
   );
 
-  const [selectedImage, setSelectedImage] = useState(product?.image);
+  const getLocalPrice = (price) => {
+    if (!price) return null;
+
+    const parsedPrice = parseFloat(
+      String(price).replace("$", "")
+    );
+
+    return Number.isNaN(parsedPrice)
+      ? null
+      : parsedPrice;
+  };
+
+  const [selectedImage, setSelectedImage] = useState(
+    product?.image
+  );
 
   const [selectedSize, setSelectedSize] = useState(
     product?.sizes?.length === 1 &&
       product.sizes[0] === "One Size"
       ? "One Size"
-      : "",
+      : ""
   );
 
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
-  const [selectedDadSize, setSelectedDadSize] = useState("");
-  const [selectedKidSize, setSelectedKidSize] = useState("");
 
-  const [printifyPrice, setPrintifyPrice] = useState(null);
-  const [printifyPrices, setPrintifyPrices] = useState({});
+  const [selectedDadSize, setSelectedDadSize] =
+    useState("");
 
+  const [selectedKidSize, setSelectedKidSize] =
+    useState("");
+
+  /*
+    Start with the local price from products.js.
+
+    This makes the price appear immediately instead of
+    showing "Loading price..." while Printify responds.
+  */
+  const [printifyPrice, setPrintifyPrice] = useState(
+    () => getLocalPrice(product?.price)
+  );
+
+  const [printifyPrices, setPrintifyPrices] = useState(
+    {}
+  );
+
+  /*
+    Reset product-specific information whenever
+    the customer switches to another product.
+  */
   useEffect(() => {
+    if (!product) return;
+
+    setSelectedImage(product.image);
+
+    setSelectedSize(
+      product.sizes?.length === 1 &&
+        product.sizes[0] === "One Size"
+        ? "One Size"
+        : ""
+    );
+
+    setSelectedDadSize("");
+    setSelectedKidSize("");
+    setSizeError(false);
+    setAdded(false);
+
+    /*
+      Immediately show the local fallback price.
+    */
+    setPrintifyPrice(
+      getLocalPrice(product.price)
+    );
+
+    setPrintifyPrices({});
+  }, [product?.id]);
+
+  /*
+    Get the live price from Printify.
+  */
+  useEffect(() => {
+    if (!product?.printifyProductId) {
+      return;
+    }
+
+    const controller = new AbortController();
+
     async function getPrintifyPrice() {
       try {
-        const response = await fetch("/api/printify-products");
+        const response = await fetch(
+          `/api/printify-products?productId=${product.printifyProductId}`,
+          {
+            signal: controller.signal,
+          }
+        );
 
         if (!response.ok) {
-          throw new Error("Could not load Printify pricing");
+          throw new Error(
+            "Could not load Printify pricing"
+          );
         }
 
         const data = await response.json();
 
-        setPrintifyPrice(data.price);
-        setPrintifyPrices(data.prices || {});
+        /*
+          Update the main price only if Printify
+          actually returned one.
+        */
+        if (data.price !== undefined && data.price !== null) {
+          const livePrice = Number(data.price);
+
+          if (!Number.isNaN(livePrice)) {
+            setPrintifyPrice(livePrice);
+          }
+        }
+
+        /*
+          Store individual size prices if available.
+        */
+        if (data.prices) {
+          const normalizedPrices = {};
+
+          Object.entries(data.prices).forEach(
+            ([size, price]) => {
+              const numericPrice = Number(price);
+
+              if (!Number.isNaN(numericPrice)) {
+                normalizedPrices[size] =
+                  numericPrice;
+              }
+            }
+          );
+
+          setPrintifyPrices(normalizedPrices);
+        }
       } catch (error) {
-        console.error("Price fetch failed:", error);
+        if (error.name === "AbortError") {
+          return;
+        }
+
+        console.error(
+          "Price fetch failed:",
+          error
+        );
+
+        /*
+          We do NOT clear the local price here.
+
+          If Printify fails, the customer still sees
+          the fallback price from products.js.
+        */
       }
     }
 
     getPrintifyPrice();
-  }, []);
 
+    return () => {
+      controller.abort();
+    };
+  }, [product?.printifyProductId]);
+
+  /*
+    Product doesn't exist.
+  */
   if (!product) {
     return <h1>Product not found</h1>;
   }
 
+  /*
+    If a selected size has its own Printify price,
+    use it.
+
+    Otherwise use the main price.
+  */
   const currentPrice =
-    selectedSize && printifyPrices[selectedSize]
+    selectedSize &&
+    printifyPrices[selectedSize] !== undefined
       ? printifyPrices[selectedSize]
       : printifyPrice;
 
   const handleAddToCart = () => {
+    /*
+      Matching sets have two size selections.
+    */
     if (product.type === "matching-set") {
       if (!selectedDadSize || !selectedKidSize) {
         setSizeError(true);
@@ -71,6 +207,9 @@ function ProductPage({ addToCart }) {
         price: currentPrice,
       });
     } else {
+      /*
+        Regular products have one size selection.
+      */
       if (!selectedSize) {
         setSizeError(true);
         return;
@@ -98,7 +237,9 @@ function ProductPage({ addToCart }) {
           <div className="product-page__thumbnails">
             <button
               type="button"
-              onClick={() => setSelectedImage(product.image)}
+              onClick={() =>
+                setSelectedImage(product.image)
+              }
             >
               <img
                 src={product.image}
@@ -108,7 +249,9 @@ function ProductPage({ addToCart }) {
 
             <button
               type="button"
-              onClick={() => setSelectedImage(product.backImage)}
+              onClick={() =>
+                setSelectedImage(product.backImage)
+              }
             >
               <img
                 src={product.backImage}
@@ -131,9 +274,10 @@ function ProductPage({ addToCart }) {
         <h1>{product.name}</h1>
 
         <p className="product-page__price">
-          {currentPrice !== null
-            ? `$${currentPrice.toFixed(2)}`
-            : "Loading price..."}
+          {currentPrice !== null &&
+          currentPrice !== undefined
+            ? `$${Number(currentPrice).toFixed(2)}`
+            : "Price unavailable"}
         </p>
 
         {product.sizes?.[0] === "One Size" && (
@@ -151,7 +295,10 @@ function ProductPage({ addToCart }) {
                 <select
                   value={selectedDadSize}
                   onChange={(e) => {
-                    setSelectedDadSize(e.target.value);
+                    setSelectedDadSize(
+                      e.target.value
+                    );
+
                     setSizeError(false);
                   }}
                 >
@@ -159,14 +306,16 @@ function ProductPage({ addToCart }) {
                     Select Dad Size
                   </option>
 
-                  {product.dadSizes.map((size) => (
-                    <option
-                      key={size}
-                      value={size}
-                    >
-                      {size}
-                    </option>
-                  ))}
+                  {product.dadSizes?.map(
+                    (size) => (
+                      <option
+                        key={size}
+                        value={size}
+                      >
+                        {size}
+                      </option>
+                    )
+                  )}
                 </select>
 
                 <label>Baby Onesie Size</label>
@@ -174,7 +323,10 @@ function ProductPage({ addToCart }) {
                 <select
                   value={selectedKidSize}
                   onChange={(e) => {
-                    setSelectedKidSize(e.target.value);
+                    setSelectedKidSize(
+                      e.target.value
+                    );
+
                     setSizeError(false);
                   }}
                 >
@@ -182,14 +334,16 @@ function ProductPage({ addToCart }) {
                     Select Baby Size
                   </option>
 
-                  {product.kidSizes.map((size) => (
-                    <option
-                      key={size}
-                      value={size}
-                    >
-                      {size}
-                    </option>
-                  ))}
+                  {product.kidSizes?.map(
+                    (size) => (
+                      <option
+                        key={size}
+                        value={size}
+                      >
+                        {size}
+                      </option>
+                    )
+                  )}
                 </select>
               </>
             ) : (
@@ -199,7 +353,10 @@ function ProductPage({ addToCart }) {
                 <select
                   value={selectedSize}
                   onChange={(e) => {
-                    setSelectedSize(e.target.value);
+                    setSelectedSize(
+                      e.target.value
+                    );
+
                     setSizeError(false);
                   }}
                 >
@@ -207,14 +364,16 @@ function ProductPage({ addToCart }) {
                     Select Size
                   </option>
 
-                  {product.sizes.map((size) => (
-                    <option
-                      key={size}
-                      value={size}
-                    >
-                      {size}
-                    </option>
-                  ))}
+                  {product.sizes?.map(
+                    (size) => (
+                      <option
+                        key={size}
+                        value={size}
+                      >
+                        {size}
+                      </option>
+                    )
+                  )}
                 </select>
               </>
             )}

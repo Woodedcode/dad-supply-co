@@ -1,8 +1,4 @@
 import Stripe from "stripe";
-import {
-  PRINTIFY_PRODUCT_ID,
-  PRINTIFY_VARIANTS,
-} from "./printify-config.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -24,69 +20,149 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get the current product information directly from Printify
-    const printifyResponse = await fetch(
-      `https://api.printify.com/v1/shops/${SHOP_ID}/products/${PRINTIFY_PRODUCT_ID}.json`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
-          "User-Agent": "Dad Standard Co",
-        },
-      },
-    );
+    const productCache = new Map();
 
-    if (!printifyResponse.ok) {
-      return res.status(500).json({
-        error: "Could not get current Printify pricing",
-      });
-    }
+    const lineItems = [];
 
-    const printifyProduct = await printifyResponse.json();
+    for (const item of cartItems) {
+      const printifyProductId = item.printifyProductId;
 
-    const lineItems = cartItems.map((item) => {
-      const variantId = PRINTIFY_VARIANTS[item.size];
-
-      if (!variantId) {
-        throw new Error(`Invalid shirt size: ${item.size}`);
+      if (!printifyProductId) {
+        throw new Error(
+          `Missing Printify product ID for ${item.name}`,
+        );
       }
 
-      const variant = printifyProduct.variants?.find(
-        (printifyVariant) => printifyVariant.id === variantId,
+      let printifyProduct = productCache.get(printifyProductId);
+
+      if (!printifyProduct) {
+        const printifyResponse = await fetch(
+          `https://api.printify.com/v1/shops/${SHOP_ID}/products/${printifyProductId}.json`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
+              "User-Agent": "Dad Standard Co",
+            },
+          },
+        );
+
+        if (!printifyResponse.ok) {
+          throw new Error(
+            `Could not load Printify product: ${item.name}`,
+          );
+        }
+
+        printifyProduct = await printifyResponse.json();
+
+        productCache.set(
+          printifyProductId,
+          printifyProduct,
+        );
+      }
+
+      /*
+        FIND THE SIZE OPTION
+      */
+
+      const sizeOption = printifyProduct.options?.find((option) =>
+        option.name?.toLowerCase().includes("size"),
       );
+
+      let variant;
+
+      /*
+        REGULAR SIZED PRODUCTS
+      */
+
+      if (sizeOption && item.size) {
+        const selectedSizeValue = sizeOption.values?.find(
+          (value) =>
+            value.title?.toLowerCase() ===
+            item.size.toLowerCase(),
+        );
+
+        if (!selectedSizeValue) {
+          throw new Error(
+            `Size ${item.size} was not found for ${item.name}`,
+          );
+        }
+
+        variant = printifyProduct.variants?.find(
+          (printifyVariant) =>
+            printifyVariant.options?.includes(
+              selectedSizeValue.id,
+            ) &&
+            printifyVariant.is_enabled !== false &&
+            printifyVariant.is_available !== false,
+        );
+      }
+
+      /*
+        ONE SIZE PRODUCTS
+      */
+
+      if (!variant && item.size === "One Size") {
+        variant = printifyProduct.variants?.find(
+          (printifyVariant) =>
+            printifyVariant.is_enabled !== false &&
+            printifyVariant.is_available !== false,
+        );
+      }
 
       if (!variant) {
         throw new Error(
-          `Printify variant not found for size ${item.size}`,
+          `Could not find a valid Printify variant for ${item.name}, size ${item.size}`,
         );
       }
+
+      /*
+        VERIFY QUANTITY
+      */
 
       const quantity = Number(item.quantity);
 
       if (!Number.isInteger(quantity) || quantity < 1) {
-        throw new Error("Invalid quantity");
+        throw new Error(
+          `Invalid quantity for ${item.name}`,
+        );
       }
 
-      return {
+      /*
+        BUILD STRIPE ITEM
+      */
+
+      lineItems.push({
         price_data: {
           currency: "usd",
 
           product_data: {
-            name: "Dad Standard Tee",
-            description: `Size: ${item.size}`,
+            name:
+              item.name ||
+              printifyProduct.title ||
+              "Dad Standard Co. Product",
+
+            description: item.size
+              ? `Size: ${item.size}`
+              : undefined,
 
             metadata: {
-              productKey: "dad-standard-tee",
-              size: item.size,
+              printifyProductId,
+              printifyVariantId: String(variant.id),
+              size: item.size || "",
             },
           },
 
-          // Printify already gives us the price in cents
+          // Printify price is already returned in cents
           unit_amount: variant.price,
         },
 
         quantity,
-      };
-    });
+      });
+    }
+
+    /*
+      CREATE STRIPE CHECKOUT SESSION
+    */
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -108,10 +184,15 @@ export default async function handler(req, res) {
       url: session.url,
     });
   } catch (error) {
-    console.error("Checkout creation failed:", error);
+    console.error(
+      "Checkout creation failed:",
+      error,
+    );
 
     return res.status(500).json({
-      error: "Could not create checkout session",
+      error:
+        error.message ||
+        "Could not create checkout session",
     });
   }
 }
