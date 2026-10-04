@@ -13,6 +13,8 @@ import HatsPage from "./pages/HatsPage.jsx";
 import MatchingPage from "./pages/MatchingPage";
 import KidsPage from "./pages/KidsPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import AboutPage from "./pages/AboutPage";
+
 
 function App() {
   const [cartItems, setCartItems] = useState(() => {
@@ -22,7 +24,10 @@ function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    localStorage.setItem(
+      "cartItems",
+      JSON.stringify(cartItems)
+    );
   }, [cartItems]);
 
   const removeFromCart = (indexToRemove) => {
@@ -30,10 +35,13 @@ function App() {
       cartItems
         .map((item, index) =>
           index === indexToRemove
-            ? { ...item, quantity: item.quantity - 1 }
-            : item,
+            ? {
+                ...item,
+                quantity: item.quantity - 1,
+              }
+            : item
         )
-        .filter((item) => item.quantity > 0),
+        .filter((item) => item.quantity > 0)
     );
   };
 
@@ -47,7 +55,10 @@ function App() {
         );
       }
 
-      return item.name === product.name && item.size === product.size;
+      return (
+        item.name === product.name &&
+        item.size === product.size
+      );
     });
 
     if (existingItem) {
@@ -57,14 +68,21 @@ function App() {
             return item.name === product.name &&
               item.dadSize === product.dadSize &&
               item.kidSize === product.kidSize
-              ? { ...item, quantity: item.quantity + 1 }
+              ? {
+                  ...item,
+                  quantity: item.quantity + 1,
+                }
               : item;
           }
 
-          return item.name === product.name && item.size === product.size
-            ? { ...item, quantity: item.quantity + 1 }
+          return item.name === product.name &&
+            item.size === product.size
+            ? {
+                ...item,
+                quantity: item.quantity + 1,
+              }
             : item;
-        }),
+        })
       );
     } else {
       setCartItems([
@@ -81,19 +99,27 @@ function App() {
     setCartItems(
       cartItems.map((item, index) =>
         index === indexToIncrease
-          ? { ...item, quantity: item.quantity + 1 }
-          : item,
-      ),
+          ? {
+              ...item,
+              quantity: item.quantity + 1,
+            }
+          : item
+      )
     );
   };
 
   const removeItem = (indexToRemove) => {
-    setCartItems(cartItems.filter((item, index) => index !== indexToRemove));
+    setCartItems(
+      cartItems.filter(
+        (item, index) => index !== indexToRemove
+      )
+    );
   };
 
-  const cartCount = cartItems.reduce((total, item) => {
-    return total + item.quantity;
-  }, 0);
+  const cartCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   const clearCart = () => {
     setCartItems([]);
@@ -106,7 +132,7 @@ function App() {
           <Link to="/">
             <img
               src={DadStandardLogo}
-              alt="Dad Standard Logo"
+              alt="Dad Standard Co."
               className="header__logo"
             />
           </Link>
@@ -114,30 +140,25 @@ function App() {
 
         <nav className="nav__links">
           <div className="shop-dropdown">
-            <button className="shop-dropdown__button">Shop</button>
+            <button className="shop-dropdown__button">
+              Shop
+            </button>
 
             <div className="shop-dropdown__menu">
               <Link to="/shirts">Shirts</Link>
-              <Link to="/matching">Matching Shirts</Link>
+              <Link to="/matching">
+                Matching Shirts
+              </Link>
               <Link to="/kids">Kids</Link>
               <Link to="/hats">Hats</Link>
             </div>
           </div>
 
-          <Link
-            to="/#about"
-            onClick={() => {
-              setTimeout(() => {
-                document.getElementById("about")?.scrollIntoView({
-                  behavior: "smooth",
-                });
-              }, 300);
-            }}
-          >
-            About
-          </Link>
+          <Link to="/about">About</Link>
 
-          <Link to="/cart">Cart ({cartCount})</Link>
+          <Link to="/cart">
+            Cart ({cartCount})
+          </Link>
         </nav>
       </header>
 
@@ -151,26 +172,41 @@ function App() {
                   <div className="hero__content">
                     <h1>Built for Dad Life</h1>
 
-                    <p>Everyday gear for dads who set their own standard.</p>
+                    <p>
+                      Everyday gear for dads who set
+                      their own standard.
+                    </p>
 
-                    <Link to="/shirts" className="hero__shop-button">
+                    <Link
+                      to="/shirts"
+                      className="hero__shop-button"
+                    >
                       Shop Now
                     </Link>
                   </div>
 
                   <figure className="hero__image">
-                    <img src={HeroImage} alt="Dad Standard Co. Clothing" />
+                    <img
+                      src={HeroImage}
+                      alt="Dad Standard Co. Clothing"
+                    />
                   </figure>
                 </section>
 
-                <section className="featured" id="featured-products">
+                <section
+                  className="featured"
+                  id="featured-products"
+                >
                   <h2>Featured Products</h2>
 
                   <div className="featured__products">
                     {products
-                      .filter((product) => [1, 2].includes(product.id))
+                      .filter((product) =>
+                        [1, 2].includes(product.id)
+                      )
                       .map((product) => (
                         <ProductCard
+                          key={product.id}
                           name={product.name}
                           price={product.price}
                           image={product.image}
@@ -179,38 +215,55 @@ function App() {
                       ))}
                   </div>
                 </section>
-
-                <section className="about" id="about">
-                  <h2>About Dad Standard Co.</h2>
-
-                  <p>
-                    Dad Standard Co. is made for dads doing their best, cracking
-                    terrible jokes, hauling too much stuff, and somehow keeping
-                    it all together.
-                    <br />
-                    <br />
-                    Comfortable gear for the everyday chaos of dad life.
-                  </p>
-                </section>
               </>
             }
           />
 
           <Route
             path="/products/:id"
-            element={<ProductPage addToCart={addToCart} />}
+            element={
+              <ProductPage
+                addToCart={addToCart}
+              />
+            }
           />
 
           <Route
             path="/shirts"
-            element={<ShirtsPage addToCart={addToCart} />}
+            element={
+              <ShirtsPage
+                addToCart={addToCart}
+              />
+            }
           />
 
-          <Route path="/matching" element={<MatchingPage />} />
+          <Route
+            path="/about"
+            element={<AboutPage />}
+          />
 
-          <Route path="/kids" element={<KidsPage addToCart={addToCart} />} />
+          <Route
+            path="/matching"
+            element={<MatchingPage />}
+          />
 
-          <Route path="/hats" element={<HatsPage addToCart={addToCart} />} />
+          <Route
+            path="/kids"
+            element={
+              <KidsPage
+                addToCart={addToCart}
+              />
+            }
+          />
+
+          <Route
+            path="/hats"
+            element={
+              <HatsPage
+                addToCart={addToCart}
+              />
+            }
+          />
 
           <Route
             path="/cart"
@@ -227,13 +280,20 @@ function App() {
           <Route
             path="/checkout"
             element={
-              <CheckoutPage cartItems={cartItems} clearCart={clearCart} />
+              <CheckoutPage
+                cartItems={cartItems}
+                clearCart={clearCart}
+              />
             }
           />
 
           <Route
             path="/order-confirmation"
-            element={<OrderConfirmationPage clearCart={clearCart} />}
+            element={
+              <OrderConfirmationPage
+                clearCart={clearCart}
+              />
+            }
           />
         </Routes>
       </main>

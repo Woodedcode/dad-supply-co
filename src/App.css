@@ -930,6 +930,118 @@ html{
   font-size: 16px;
 }
 
+/* =========================
+   ABOUT PAGE
+========================= */
+
+.about-page {
+  background: #fff;
+}
+
+.about-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 90px 40px 120px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.about-photo {
+  position: sticky;
+  top: 130px;
+}
+
+.about-photo__placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-photo__placeholder span {
+  color: #777;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.about-story__eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin-bottom: 18px;
+}
+
+.about-story h1 {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 32px;
+}
+
+.about-story h2 {
+  font-size: 32px;
+  margin-top: 40px;
+  margin-bottom: 12px;
+}
+
+.about-story p {
+  font-size: 18px;
+  line-height: 1.75;
+  margin-bottom: 22px;
+}
+
+.about-story blockquote {
+  font-size: 24px;
+  line-height: 1.4;
+  font-weight: 700;
+  margin: 30px 0;
+  padding-left: 24px;
+  border-left: 4px solid #111;
+}
+
+.about-story__built {
+  font-size: 21px !important;
+}
+
+.about-story__tagline {
+  font-weight: 700;
+  font-style: italic;
+}
+
+.about-shop-button {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 16px 28px;
+  background: #111;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  transition: background 0.2s ease;
+}
+
+.about-shop-button:hover {
+  background: #333;
+}
+
+/* 
+  FOUNDER PICTURE
+*/
+
+.about-photo__image {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
 /* 
   RESPONSIVENESS
 */
@@ -1165,5 +1277,35 @@ html{
   .product-info__content {
     font-size: 14px;
     line-height: 1.6;
+  }
+
+  .about-hero {
+    grid-template-columns: 1fr;
+    padding: 50px 20px 80px;
+    gap: 40px;
+  }
+
+  .about-photo {
+    position: static;
+  }
+
+  .about-photo__placeholder {
+    max-height: 500px;
+  }
+
+  .about-story h1 {
+    font-size: 42px;
+  }
+
+  .about-story p {
+    font-size: 17px;
+  }
+
+  .about-story blockquote {
+    font-size: 21px;
+  }
+
+  .about-photo__image {
+    height: 420px;
   }
 }
