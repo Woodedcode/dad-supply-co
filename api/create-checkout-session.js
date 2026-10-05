@@ -21,7 +21,6 @@ export default async function handler(req, res) {
     }
 
     const productCache = new Map();
-
     const lineItems = [];
 
     for (const item of cartItems) {
@@ -33,7 +32,8 @@ export default async function handler(req, res) {
         );
       }
 
-      let printifyProduct = productCache.get(printifyProductId);
+      let printifyProduct =
+        productCache.get(printifyProductId);
 
       if (!printifyProduct) {
         const printifyResponse = await fetch(
@@ -52,7 +52,8 @@ export default async function handler(req, res) {
           );
         }
 
-        printifyProduct = await printifyResponse.json();
+        printifyProduct =
+          await printifyResponse.json();
 
         productCache.set(
           printifyProductId,
@@ -61,12 +62,13 @@ export default async function handler(req, res) {
       }
 
       /*
-        FIND THE SIZE OPTION
+        FIND SIZE OPTION
       */
 
-      const sizeOption = printifyProduct.options?.find((option) =>
-        option.name?.toLowerCase().includes("size"),
-      );
+      const sizeOption =
+        printifyProduct.options?.find((option) =>
+          option.name?.toLowerCase().includes("size"),
+        );
 
       let variant;
 
@@ -75,11 +77,12 @@ export default async function handler(req, res) {
       */
 
       if (sizeOption && item.size) {
-        const selectedSizeValue = sizeOption.values?.find(
-          (value) =>
-            value.title?.toLowerCase() ===
-            item.size.toLowerCase(),
-        );
+        const selectedSizeValue =
+          sizeOption.values?.find(
+            (value) =>
+              value.title?.toLowerCase() ===
+              item.size.toLowerCase(),
+          );
 
         if (!selectedSizeValue) {
           throw new Error(
@@ -87,14 +90,15 @@ export default async function handler(req, res) {
           );
         }
 
-        variant = printifyProduct.variants?.find(
-          (printifyVariant) =>
-            printifyVariant.options?.includes(
-              selectedSizeValue.id,
-            ) &&
-            printifyVariant.is_enabled !== false &&
-            printifyVariant.is_available !== false,
-        );
+        variant =
+          printifyProduct.variants?.find(
+            (printifyVariant) =>
+              printifyVariant.options?.includes(
+                selectedSizeValue.id,
+              ) &&
+              printifyVariant.is_enabled !== false &&
+              printifyVariant.is_available !== false,
+          );
       }
 
       /*
@@ -102,11 +106,12 @@ export default async function handler(req, res) {
       */
 
       if (!variant && item.size === "One Size") {
-        variant = printifyProduct.variants?.find(
-          (printifyVariant) =>
-            printifyVariant.is_enabled !== false &&
-            printifyVariant.is_available !== false,
-        );
+        variant =
+          printifyProduct.variants?.find(
+            (printifyVariant) =>
+              printifyVariant.is_enabled !== false &&
+              printifyVariant.is_available !== false,
+          );
       }
 
       if (!variant) {
@@ -121,7 +126,10 @@ export default async function handler(req, res) {
 
       const quantity = Number(item.quantity);
 
-      if (!Number.isInteger(quantity) || quantity < 1) {
+      if (
+        !Number.isInteger(quantity) ||
+        quantity < 1
+      ) {
         throw new Error(
           `Invalid quantity for ${item.name}`,
         );
@@ -147,12 +155,14 @@ export default async function handler(req, res) {
 
             metadata: {
               printifyProductId,
-              printifyVariantId: String(variant.id),
+              printifyVariantId: String(
+                variant.id,
+              ),
               size: item.size || "",
             },
           },
 
-          // Printify price is already returned in cents
+          // Printify returns price in cents
           unit_amount: variant.price,
         },
 
@@ -164,23 +174,44 @@ export default async function handler(req, res) {
       CREATE STRIPE CHECKOUT SESSION
     */
 
-    const session = await stripe.checkout.sessions.create({
-  mode: "payment",
+    const session =
+      await stripe.checkout.sessions.create({
+        mode: "payment",
 
-  line_items: lineItems,
+        line_items: lineItems,
 
-  shipping_address_collection: {
-    allowed_countries: ["US"],
-  },
+        shipping_address_collection: {
+          allowed_countries: ["US"],
+        },
 
-  phone_number_collection: {
-    enabled: true,
-  },
+        phone_number_collection: {
+          enabled: true,
+        },
 
-  success_url:
-    "https://www.dadstandardco.com/order-confirmation",
+        success_url:
+          "https://www.dadstandardco.com/order-confirmation",
 
-  cancel_url:
-    "https://www.dadstandardco.com/cart",
-});
+        cancel_url:
+          "https://www.dadstandardco.com/cart",
+      });
+
+    /*
+      SEND STRIPE CHECKOUT URL BACK TO SITE
+    */
+
+    return res.status(200).json({
+      url: session.url,
+    });
+  } catch (error) {
+    console.error(
+      "Checkout creation failed:",
+      error,
+    );
+
+    return res.status(500).json({
+      error:
+        error.message ||
+        "Could not create checkout session",
+    });
+  }
 }
