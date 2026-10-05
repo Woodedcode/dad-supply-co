@@ -31,13 +31,10 @@ export default async function handler(req, res) {
     event = stripe.webhooks.constructEvent(
       rawBody,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.STRIPE_WEBHOOK_SECRET,
     );
   } catch (error) {
-    console.error(
-      "Webhook signature verification failed:",
-      error.message
-    );
+    console.error("Webhook signature verification failed:", error.message);
 
     return res.status(400).json({
       error: "Webhook signature verification failed",
@@ -73,9 +70,7 @@ export default async function handler(req, res) {
       DON'T FULFILL UNTIL STRIPE SAYS PAID
     */
     if (session.payment_status !== "paid") {
-      console.log(
-        "Payment is not paid yet — skipping Printify fulfillment"
-      );
+      console.log("Payment is not paid yet — skipping Printify fulfillment");
 
       return res.status(200).json({
         received: true,
@@ -86,19 +81,13 @@ export default async function handler(req, res) {
     /*
       GET PURCHASED ITEMS FROM STRIPE
     */
-    const lineItems =
-      await stripe.checkout.sessions.listLineItems(
-        session.id,
-        {
-          limit: 100,
-          expand: ["data.price.product"],
-        }
-      );
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      limit: 100,
+      expand: ["data.price.product"],
+    });
 
     if (!lineItems.data.length) {
-      throw new Error(
-        "Stripe checkout contains no line items"
-      );
+      throw new Error("Stripe checkout contains no line items");
     }
 
     console.log(
@@ -106,92 +95,60 @@ export default async function handler(req, res) {
       lineItems.data.map((item) => ({
         name: item.description,
         quantity: item.quantity,
-        metadata:
-          item.price?.product?.metadata || {},
-      }))
+        metadata: item.price?.product?.metadata || {},
+      })),
     );
 
     /*
       CONVERT STRIPE ITEMS INTO PRINTIFY ITEMS
     */
-    const printifyItems = lineItems.data.map(
-      (item) => {
-        const metadata =
-          item.price?.product?.metadata || {};
+    const printifyItems = lineItems.data.map((item) => {
+      const metadata = item.price?.product?.metadata || {};
 
-        const printifyProductId =
-          metadata.printifyProductId;
+      const printifyProductId = metadata.printifyProductId;
 
-        const printifyVariantId = Number(
-          metadata.printifyVariantId
-        );
+      const printifyVariantId = Number(metadata.printifyVariantId);
 
-        const quantity = Number(item.quantity);
+      const quantity = Number(item.quantity);
 
-        if (!printifyProductId) {
-          throw new Error(
-            `Missing Printify product ID for ${item.description}`
-          );
-        }
-
-        if (
-          !Number.isInteger(printifyVariantId) ||
-          printifyVariantId <= 0
-        ) {
-          throw new Error(
-            `Invalid Printify variant ID for ${item.description}`
-          );
-        }
-
-        if (
-          !Number.isInteger(quantity) ||
-          quantity < 1
-        ) {
-          throw new Error(
-            `Invalid quantity for ${item.description}`
-          );
-        }
-
-        return {
-          product_id: printifyProductId,
-          variant_id: printifyVariantId,
-          quantity,
-        };
+      if (!printifyProductId) {
+        throw new Error(`Missing Printify product ID for ${item.description}`);
       }
-    );
+
+      if (!Number.isInteger(printifyVariantId) || printifyVariantId <= 0) {
+        throw new Error(`Invalid Printify variant ID for ${item.description}`);
+      }
+
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        throw new Error(`Invalid quantity for ${item.description}`);
+      }
+
+      return {
+        product_id: printifyProductId,
+        variant_id: printifyVariantId,
+        quantity,
+      };
+    });
 
     /*
       GET CUSTOMER + SHIPPING INFO
     */
     const shipping =
-      session.collected_information
-        ?.shipping_details ||
+      session.collected_information?.shipping_details ||
       session.shipping_details ||
       null;
 
-    const customer =
-      session.customer_details || {};
+    const customer = session.customer_details || {};
 
-    const shippingAddress =
-      shipping?.address ||
-      customer?.address ||
-      {};
+    const shippingAddress = shipping?.address || customer?.address || {};
 
-    const fullName =
-      shipping?.name ||
-      customer?.name ||
-      "Customer";
+    const fullName = shipping?.name || customer?.name || "Customer";
 
-    const nameParts = fullName
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
+    const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
 
-    const firstName =
-      nameParts[0] || "Customer";
+    const firstName = nameParts[0] || "Customer";
 
-    const lastName =
-      nameParts.slice(1).join(" ") || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
 
     /*
       BUILD PRINTIFY ORDER
@@ -211,46 +168,31 @@ export default async function handler(req, res) {
         first_name: firstName,
         last_name: lastName,
 
-        email:
-          customer.email ||
-          session.customer_email ||
-          "",
+        email: customer.email || session.customer_email || "",
 
-        phone:
-          customer.phone || "",
+        phone: customer.phone || "",
 
-        country:
-          shippingAddress.country || "US",
+        country: shippingAddress.country || "US",
 
-        region:
-          shippingAddress.state || "",
+        region: shippingAddress.state || "",
 
-        address1:
-          shippingAddress.line1 || "",
+        address1: shippingAddress.line1 || "",
 
-        address2:
-          shippingAddress.line2 || "",
+        address2: shippingAddress.line2 || "",
 
-        city:
-          shippingAddress.city || "",
+        city: shippingAddress.city || "",
 
-        zip:
-          shippingAddress.postal_code || "",
+        zip: shippingAddress.postal_code || "",
       },
     };
 
-    console.log(
-      "Printify order prepared:",
-      printifyOrder
-    );
+    console.log("Printify order prepared:", printifyOrder);
 
     /*
       DO NOT FULFILL STRIPE TEST MODE PAYMENTS
     */
     if (!event.livemode) {
-      console.log(
-        "Stripe test payment — Printify order not created"
-      );
+      console.log("Stripe test payment — Printify order not created");
 
       return res.status(200).json({
         received: true,
@@ -265,13 +207,8 @@ export default async function handler(req, res) {
 
       PRINTIFY_FULFILLMENT_ENABLED=true
     */
-    if (
-      process.env.PRINTIFY_FULFILLMENT_ENABLED !==
-      "true"
-    ) {
-      console.log(
-        "Printify fulfillment is disabled"
-      );
+    if (process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true") {
+      console.log("Printify fulfillment is disabled");
 
       return res.status(200).json({
         received: true,
@@ -292,31 +229,27 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
           "User-Agent": "Dad Standard Co",
         },
-      }
+      },
     );
 
     if (!existingOrdersResponse.ok) {
-      const errorText =
-        await existingOrdersResponse.text();
+      const errorText = await existingOrdersResponse.text();
 
-      throw new Error(
-        `Could not check Printify orders: ${errorText}`
-      );
+      throw new Error(`Could not check Printify orders: ${errorText}`);
     }
 
-    const existingOrders =
-      await existingOrdersResponse.json();
+    const existingOrders = await existingOrdersResponse.json();
 
-    const duplicateOrder =
-      existingOrders.data?.find(
-        (order) =>
-          order.external_id === session.id
-      );
+    const orderLabel = `Dad Standard - ${session.id}`;
+
+    const duplicateOrder = existingOrders.data?.find(
+      (order) =>
+        order.external_id === session.id ||
+        order.metadata?.shop_order_label === orderLabel,
+    );
 
     if (duplicateOrder) {
-      console.log(
-        "Printify order already exists — skipping duplicate"
-      );
+      console.log("Printify order already exists — skipping duplicate");
 
       return res.status(200).json({
         received: true,
@@ -339,17 +272,13 @@ export default async function handler(req, res) {
         },
 
         body: JSON.stringify(printifyOrder),
-      }
+      },
     );
 
-    const printifyResult =
-      await printifyResponse.json();
+    const printifyResult = await printifyResponse.json();
 
     if (!printifyResponse.ok) {
-      console.error(
-        "Printify order creation failed:",
-        printifyResult
-      );
+      console.error("Printify order creation failed:", printifyResult);
 
       return res.status(500).json({
         error: "Printify order creation failed",
@@ -357,27 +286,18 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(
-      "PRINTIFY ORDER CREATED:",
-      printifyResult
-    );
+    console.log("PRINTIFY ORDER CREATED:", printifyResult);
 
     return res.status(200).json({
       received: true,
       fulfillment: "created",
-      printifyOrderId:
-        printifyResult.id || null,
+      printifyOrderId: printifyResult.id || null,
     });
   } catch (error) {
-    console.error(
-      "Printify fulfillment failed:",
-      error
-    );
+    console.error("Printify fulfillment failed:", error);
 
     return res.status(500).json({
-      error:
-        error.message ||
-        "Printify fulfillment failed",
+      error: error.message || "Printify fulfillment failed",
     });
   }
 }
