@@ -286,7 +286,7 @@ export default async function handler(req, res) {
       creating the same Printify order twice.
     */
     const existingOrdersResponse = await fetch(
-      `https://api.printify.com/v1/shops/${SHOP_ID}/orders.json?limit=100`,
+      `https://api.printify.com/v1/shops/${SHOP_ID}/orders.json?limit=10`,
       {
         headers: {
           Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
