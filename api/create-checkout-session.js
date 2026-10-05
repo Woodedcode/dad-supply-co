@@ -165,34 +165,22 @@ export default async function handler(req, res) {
     */
 
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+  mode: "payment",
 
-      line_items: lineItems,
+  line_items: lineItems,
 
-      shipping_address_collection: {
-        allowed_countries: ["US"],
-      },
+  shipping_address_collection: {
+    allowed_countries: ["US"],
+  },
 
-      success_url:
-        "https://www.dadstandardco.com/order-confirmation",
+  phone_number_collection: {
+    enabled: true,
+  },
 
-      cancel_url:
-        "https://www.dadstandardco.com/cart",
-    });
+  success_url:
+    "https://www.dadstandardco.com/order-confirmation",
 
-    return res.status(200).json({
-      url: session.url,
-    });
-  } catch (error) {
-    console.error(
-      "Checkout creation failed:",
-      error,
-    );
-
-    return res.status(500).json({
-      error:
-        error.message ||
-        "Could not create checkout session",
-    });
-  }
+  cancel_url:
+    "https://www.dadstandardco.com/cart",
+});
 }
