@@ -42,9 +42,9 @@ const products = [
     printifyProductId: "6ac16b360c4065ff510ba05d",
     price: "$35.00",
     image:
-"https://images.printify.com/mockup/6ac16b360c4065ff510ba05d/38192/97992/unisex-softstyle-t-shirt.jpg?camera_label=front&t=1791061608600&s=500",
+    "https://images.printify.com/mockup/6ac16b360c4065ff510ba05d/38192/97993/unisex-softstyle-t-shirt.jpg?camera_label=back&t=1791061383074&s=500",
     backImage:
-"https://images.printify.com/mockup/6ac16b360c4065ff510ba05d/38192/97993/unisex-softstyle-t-shirt.jpg?camera_label=back&t=1791061383074&s=500",
+"https://images.printify.com/mockup/6ac16b360c4065ff510ba05d/38192/97992/unisex-softstyle-t-shirt.jpg?camera_label=front&t=1791061608600&s=500",
     type: "shirt",
     sizes: ["S", "M", "L", "XL", "2XL"],
     description:
