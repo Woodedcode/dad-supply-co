@@ -4,6 +4,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const SHOP_ID = "29064058";
 
+const ALLOWED_PRODUCT_IDS = new Set([
+  "6ab5453141b86e214f0f51c2", // Dad Standard Tee
+  "6ac16b360c4065ff510ba05d", // IM-PASTA Tee
+]);
+
 export default async function handler(req, res) {
 
   // Temporarily pause checkout during fulfillment testing
@@ -33,6 +38,12 @@ export default async function handler(req, res) {
 
     for (const item of cartItems) {
       const printifyProductId = item.printifyProductId;
+
+      if (!ALLOWED_PRODUCT_IDS.has(printifyProductId)) {
+  return res.status(400).json({
+    error: "This product is not available for checkout.",
+  });
+}
 
       if (!printifyProductId) {
         throw new Error(
