@@ -101,7 +101,7 @@ export default async function handler(req, res) {
         cancel_url: "https://www.dadstandardco.com/cart",
       },
       {
-        idempotencyKey: "dad-standard-private-live-test-v1-20261009",
+        idempotencyKey: "dad-standard-private-live-test-v2-20261010",
       }
     );
 
