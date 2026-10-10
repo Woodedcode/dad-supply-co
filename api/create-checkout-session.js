@@ -5,6 +5,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const SHOP_ID = "29064058";
 
 export default async function handler(req, res) {
+
+  // Temporarily pause checkout during fulfillment testing
+  if (process.env.CHECKOUT_ENABLED !== "true") {
+    return res.status(503).json({
+      error: "Checkout is temporarily unavailable. Please check back soon.",
+    });
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({
       error: "Method not allowed",
