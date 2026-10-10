@@ -1,9 +1,17 @@
+
 import Stripe from "stripe";
 import getRawBody from "raw-body";
+import { supabase } from "./supabase.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const SHOP_ID = "29064058";
+const PRINTIFY_API = `https://api.printify.com/v1/shops/${SHOP_ID}`;
+
+const ALLOWED_PRODUCT_IDS = new Set([
+  "6ab5453141b86e214f0f51c2", // Dad Standard Tee
+  "6ac16b360c4065ff510ba05d", // IM-PASTA Tee
+]);
 
 export const config = {
   api: {
@@ -11,6 +19,116 @@ export const config = {
   },
 };
 
+// PRINTIFY API HEADERS
+function printifyHeaders() {
+  return {
+    Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
+    "User-Agent": "Dad Standard Co",
+  };
+}
+
+// VERIFY PRINTIFY PRODUCT AND SIZE
+async function verifyPrintifyVariant(
+  productId,
+  variantId,
+  requestedSize
+) {
+  const response = await fetch(
+    `${PRINTIFY_API}/products/${productId}.json`,
+    {
+      headers: printifyHeaders(),
+      signal: AbortSignal.timeout(10000),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Printify product lookup failed (${response.status})`
+    );
+  }
+
+  const product = await response.json();
+
+  const variant = product.variants?.find(
+    (item) =>
+      item.id === variantId &&
+      item.is_enabled === true &&
+      item.is_available === true
+  );
+
+  if (!variant) {
+    throw new Error(
+      `Printify variant ${variantId} is invalid or unavailable`
+    );
+  }
+
+  // Supports titles such as "Black / L" or "L / Natural"
+  if (requestedSize) {
+    const sizesAndColors = String(variant.title)
+      .split("/")
+      .map((part) => part.trim().toUpperCase());
+
+    if (
+      !sizesAndColors.includes(
+        String(requestedSize).trim().toUpperCase()
+      )
+    ) {
+      throw new Error(
+        `Printify size does not match variant ${variantId}`
+      );
+    }
+  }
+
+  return variant;
+}
+
+// FLAG AN ORDER FOR MANUAL REVIEW
+async function flagForReview(sessionId) {
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      status: "needs_review",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("stripe_session_id", sessionId)
+    .eq("status", "processing");
+
+  if (error) {
+    console.error(
+      "Could not flag order for manual review:",
+      {
+        sessionId,
+        error: error.message,
+      }
+    );
+  }
+}
+
+// RECORD SUCCESSFUL PRINTIFY ORDER
+async function recordPrintifyOrder(
+  sessionId,
+  printifyOrderId
+) {
+  const { data, error } = await supabase
+    .from("orders")
+    .update({
+      status: "submitted",
+      printify_order_id: String(printifyOrderId),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("stripe_session_id", sessionId)
+    .eq("status", "processing")
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    throw new Error(
+      "Printify order exists, but database tracking failed"
+    );
+  }
+}
+
+// MAIN STRIPE WEBHOOK
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -18,141 +136,275 @@ export default async function handler(req, res) {
     });
   }
 
-  const signature = req.headers["stripe-signature"];
-
   let event;
 
-  /*
-    VERIFY STRIPE WEBHOOK
-  */
+  // VERIFY STRIPE SIGNATURE
   try {
     const rawBody = await getRawBody(req);
 
     event = stripe.webhooks.constructEvent(
       rawBody,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET,
+      req.headers["stripe-signature"],
+      process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (error) {
-    console.error("Webhook signature verification failed:", error.message);
+    console.error(
+      "Invalid Stripe webhook signature:",
+      error.message
+    );
 
     return res.status(400).json({
-      error: "Webhook signature verification failed",
+      error: "Invalid webhook signature",
     });
   }
 
-  /*
-    WE FULFILL:
-    - normal completed payments
-    - delayed payments once they actually succeed
-  */
-  const fulfillmentEvents = [
-    "checkout.session.completed",
-    "checkout.session.async_payment_succeeded",
-  ];
-
-  if (!fulfillmentEvents.includes(event.type)) {
+  // ONLY PROCESS PAYMENT EVENTS
+  if (
+    event.type !== "checkout.session.completed" &&
+    event.type !== "checkout.session.async_payment_succeeded"
+  ) {
     return res.status(200).json({
       received: true,
     });
   }
 
+  const session = event.data.object;
+
+  let claimedSessionId = null;
+
   try {
-    const session = event.data.object;
-
-    console.log("Stripe checkout received:", {
-      sessionId: session.id,
-      eventType: event.type,
-      paymentStatus: session.payment_status,
-    });
-
-    /*
-      DON'T FULFILL UNTIL STRIPE SAYS PAID
-    */
+    // CHECK PAYMENT STATUS
     if (session.payment_status !== "paid") {
-      console.log("Payment is not paid yet — skipping Printify fulfillment");
-
       return res.status(200).json({
         received: true,
-        fulfillment: "waiting_for_payment",
+        fulfillment: "awaiting_payment",
       });
     }
 
-    /*
-      GET PURCHASED ITEMS FROM STRIPE
-    */
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
-      limit: 100,
-      expand: ["data.price.product"],
-    });
-
-    if (!lineItems.data.length) {
-      throw new Error("Stripe checkout contains no line items");
+    if (!session.payment_intent) {
+      throw new Error(
+        "Stripe Payment Intent is missing"
+      );
     }
 
-    console.log(
-      "Purchased items:",
-      lineItems.data.map((item) => ({
-        name: item.description,
-        quantity: item.quantity,
-        metadata: item.price?.product?.metadata || {},
-      })),
-    );
+    const paymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent.id;
 
-    /*
-      CONVERT STRIPE ITEMS INTO PRINTIFY ITEMS
-    */
-    const printifyItems = lineItems.data.map((item) => {
-      const metadata = item.price?.product?.metadata || {};
+    // VERIFY PAYMENT DIRECTLY WITH STRIPE
+    const paymentIntent =
+      await stripe.paymentIntents.retrieve(
+        paymentIntentId,
+        {
+          expand: ["latest_charge"],
+        }
+      );
 
-      const printifyProductId = metadata.printifyProductId;
+    if (paymentIntent.status !== "succeeded") {
+      throw new Error(
+        "Stripe payment has not succeeded"
+      );
+    }
 
-      const printifyVariantId = Number(metadata.printifyVariantId);
+    const charge = paymentIntent.latest_charge;
 
-      const quantity = Number(item.quantity);
+    if (!charge || typeof charge === "string") {
+      throw new Error(
+        "Unable to verify Stripe charge"
+      );
+    }
 
-      if (!printifyProductId) {
-        throw new Error(`Missing Printify product ID for ${item.description}`);
+    // NEVER FULFILL REFUNDED PAYMENTS
+    if (
+      charge.refunded ||
+      charge.amount_refunded > 0
+    ) {
+      console.log(
+        "Refunded Stripe session skipped:",
+        session.id
+      );
+
+      return res.status(200).json({
+        received: true,
+        fulfillment: "refunded_skipped",
+      });
+    }
+
+    // NEVER FULFILL TEST PAYMENTS
+    if (!event.livemode) {
+      return res.status(200).json({
+        received: true,
+        fulfillment: "test_mode_skipped",
+      });
+    }
+
+    // PRINTIFY SAFETY SWITCH
+    // KEEP DISABLED UNTIL TESTING IS COMPLETE
+    if (
+      process.env.PRINTIFY_FULFILLMENT_ENABLED !==
+      "true"
+    ) {
+      console.warn(
+        "Printify fulfillment disabled for session:",
+        session.id
+      );
+
+      return res.status(200).json({
+        received: true,
+        fulfillment: "disabled",
+      });
+    }
+
+    // GET STRIPE PURCHASED ITEMS
+    const lineItems =
+      await stripe.checkout.sessions.listLineItems(
+        session.id,
+        {
+          limit: 100,
+          expand: ["data.price.product"],
+        }
+      );
+
+    if (
+      !lineItems.data.length ||
+      lineItems.has_more
+    ) {
+      throw new Error(
+        "Stripe line items are missing or incomplete"
+      );
+    }
+
+    const printifyItems = [];
+
+    // CONVERT STRIPE ITEMS TO PRINTIFY ITEMS
+    for (const item of lineItems.data) {
+      const metadata =
+        item.price?.product?.metadata || {};
+
+      const productId =
+        metadata.printifyProductId;
+
+      const variantId = Number(
+        metadata.printifyVariantId
+      );
+
+      const quantity = Number(
+        item.quantity
+      );
+
+      // VALIDATE PRODUCT
+      if (!ALLOWED_PRODUCT_IDS.has(productId)) {
+        throw new Error(
+          "Checkout contains an unapproved Printify product"
+        );
       }
 
-      if (!Number.isInteger(printifyVariantId) || printifyVariantId <= 0) {
-        throw new Error(`Invalid Printify variant ID for ${item.description}`);
+      // VALIDATE VARIANT
+      if (
+        !Number.isInteger(variantId) ||
+        variantId <= 0
+      ) {
+        throw new Error(
+          "Checkout contains an invalid Printify variant"
+        );
       }
 
-      if (!Number.isInteger(quantity) || quantity < 1) {
-        throw new Error(`Invalid quantity for ${item.description}`);
+      // VALIDATE QUANTITY
+      if (
+        !Number.isInteger(quantity) ||
+        quantity < 1
+      ) {
+        throw new Error(
+          "Checkout contains an invalid quantity"
+        );
       }
 
-      return {
-        product_id: printifyProductId,
-        variant_id: printifyVariantId,
+      // VERIFY PRODUCT AND SIZE WITH PRINTIFY
+      await verifyPrintifyVariant(
+        productId,
+        variantId,
+        metadata.size
+      );
+
+      printifyItems.push({
+        product_id: productId,
+        variant_id: variantId,
         quantity,
-      };
-    });
+      });
+    }
 
-    /*
-      GET CUSTOMER + SHIPPING INFO
-    */
+    // GET CUSTOMER SHIPPING INFORMATION
     const shipping =
-      session.collected_information?.shipping_details ||
+      session.collected_information
+        ?.shipping_details ||
       session.shipping_details ||
       null;
 
-    const customer = session.customer_details || {};
+    const customer =
+      session.customer_details || {};
 
-    const shippingAddress = shipping?.address || customer?.address || {};
+    const address =
+      shipping?.address ||
+      customer.address ||
+      {};
 
-    const fullName = shipping?.name || customer?.name || "Customer";
+    const name = String(
+      shipping?.name ||
+      customer.name ||
+      ""
+    ).trim();
 
-    const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+    const [firstName, ...lastNameParts] =
+      name.split(/\s+/);
 
-    const firstName = nameParts[0] || "Customer";
+    const addressTo = {
+      first_name: firstName || "",
+      last_name: lastNameParts.join(" "),
 
-    const lastName = nameParts.slice(1).join(" ") || "";
+      email:
+        customer.email ||
+        session.customer_email ||
+        "",
 
-    /*
-      BUILD PRINTIFY ORDER
-    */
+      phone: customer.phone || "",
+
+      country: address.country || "",
+      region: address.state || "",
+
+      address1: address.line1 || "",
+      address2: address.line2 || "",
+
+      city: address.city || "",
+      zip: address.postal_code || "",
+    };
+
+    // VERIFY SHIPPING INFORMATION
+    const requiredFields = [
+      "first_name",
+      "last_name",
+      "email",
+      "country",
+      "address1",
+      "city",
+      "zip",
+    ];
+
+    if (
+      requiredFields.some(
+        (field) => !addressTo[field]
+      ) ||
+      (
+        ["US", "CA"].includes(addressTo.country) &&
+        !addressTo.region
+      )
+    ) {
+      throw new Error(
+        "Shipping information is incomplete"
+      );
+    }
+
+    // BUILD PRINTIFY ORDER
     const printifyOrder = {
       external_id: session.id,
 
@@ -164,140 +416,171 @@ export default async function handler(req, res) {
 
       send_shipping_notification: false,
 
-      address_to: {
-        first_name: firstName,
-        last_name: lastName,
-
-        email: customer.email || session.customer_email || "",
-
-        phone: customer.phone || "",
-
-        country: shippingAddress.country || "US",
-
-        region: shippingAddress.state || "",
-
-        address1: shippingAddress.line1 || "",
-
-        address2: shippingAddress.line2 || "",
-
-        city: shippingAddress.city || "",
-
-        zip: shippingAddress.postal_code || "",
-      },
+      address_to: addressTo,
     };
 
-    console.log("Printify order prepared:", printifyOrder);
-
-    /*
-      DO NOT FULFILL STRIPE TEST MODE PAYMENTS
-    */
-    if (!event.livemode) {
-      console.log("Stripe test payment — Printify order not created");
-
-      return res.status(200).json({
-        received: true,
-        fulfillment: "skipped_test_mode",
-      });
-    }
-
-    /*
-      SAFETY SWITCH
-
-      Vercel must have:
-
-      PRINTIFY_FULFILLMENT_ENABLED=true
-    */
-    if (process.env.PRINTIFY_FULFILLMENT_ENABLED !== "true") {
-      console.log("Printify fulfillment is disabled");
-
-      return res.status(200).json({
-        received: true,
-        fulfillment: "disabled",
-      });
-    }
-
-    /*
-      CHECK PRINTIFY FOR AN EXISTING ORDER
-
-      This prevents Stripe from accidentally
-      creating the same Printify order twice.
-    */
-    const existingOrdersResponse = await fetch(
-      `https://api.printify.com/v1/shops/${SHOP_ID}/orders.json?limit=10`,
+    // CLAIM ORDER IN SUPABASE
+    // PREVENT DUPLICATE ORDERS
+    const {
+      data: claimRows,
+      error: claimError,
+    } = await supabase.rpc(
+      "claim_order",
       {
-        headers: {
-          Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
-          "User-Agent": "Dad Standard Co",
-        },
-      },
+        p_stripe_session_id: session.id,
+      }
     );
 
-    if (!existingOrdersResponse.ok) {
-      const errorText = await existingOrdersResponse.text();
-
-      throw new Error(`Could not check Printify orders: ${errorText}`);
+    if (claimError) {
+      throw new Error(
+        `Supabase claim failed: ${claimError.message}`
+      );
     }
 
-    const existingOrders = await existingOrdersResponse.json();
+    const claim = claimRows?.[0];
 
-    const orderLabel = `Dad Standard - ${session.id}`;
+    if (!claim) {
+      throw new Error(
+        "Supabase did not return an order claim"
+      );
+    }
 
-    const duplicateOrder = existingOrders.data?.find(
+    // IF ALREADY CLAIMED, DO NOT CREATE AGAIN
+    if (!claim.claimed) {
+      return res.status(200).json({
+        received: true,
+        fulfillment: "already_claimed",
+        status: claim.current_status,
+      });
+    }
+
+    claimedSessionId = session.id;
+
+    // CHECK RECENT PRINTIFY ORDERS
+    const existingResponse = await fetch(
+      `${PRINTIFY_API}/orders.json?limit=10`,
+      {
+        headers: printifyHeaders(),
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+
+    if (!existingResponse.ok) {
+      throw new Error(
+        `Printify order lookup failed (${existingResponse.status})`
+      );
+    }
+
+    const existingOrders =
+      await existingResponse.json();
+
+    const duplicate = existingOrders.data?.find(
       (order) =>
         order.external_id === session.id ||
-        order.metadata?.shop_order_label === orderLabel,
+        String(
+          order.metadata?.shop_order_id || ""
+        ) === session.id ||
+        order.metadata?.shop_order_label ===
+          printifyOrder.label
     );
 
-    if (duplicateOrder) {
-      console.log("Printify order already exists — skipping duplicate");
+    // IF PRINTIFY ORDER ALREADY EXISTS
+    if (duplicate) {
+      await recordPrintifyOrder(
+        session.id,
+        duplicate.id
+      );
+
+      claimedSessionId = null;
 
       return res.status(200).json({
         received: true,
-        fulfillment: "duplicate_skipped",
+        fulfillment: "already_in_printify",
       });
     }
 
-    /*
-      CREATE PRINTIFY ORDER
-    */
-    const printifyResponse = await fetch(
-      `https://api.printify.com/v1/shops/${SHOP_ID}/orders.json`,
+    // CREATE PRINTIFY ORDER
+    // DO NOT AUTO-RETRY UNCERTAIN SUBMISSIONS
+    const response = await fetch(
+      `${PRINTIFY_API}/orders.json`,
       {
         method: "POST",
 
         headers: {
-          Authorization: `Bearer ${process.env.PRINTIFY_API_TOKEN}`,
+          ...printifyHeaders(),
           "Content-Type": "application/json",
-          "User-Agent": "Dad Standard Co",
         },
 
         body: JSON.stringify(printifyOrder),
-      },
+
+        signal: AbortSignal.timeout(15000),
+      }
     );
 
-    const printifyResult = await printifyResponse.json();
+    let result;
 
-    if (!printifyResponse.ok) {
-      console.error("Printify order creation failed:", printifyResult);
-
-      return res.status(500).json({
-        error: "Printify order creation failed",
-        details: printifyResult,
-      });
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error(
+        "Printify returned an unreadable response; review order manually"
+      );
     }
 
-    console.log("PRINTIFY ORDER CREATED:", printifyResult);
+    if (!response.ok || !result?.id) {
+      throw new Error(
+        `Printify order result needs manual review (HTTP ${response.status})`
+      );
+    }
 
+    // SAVE PRINTIFY ORDER ID IN SUPABASE
+    await recordPrintifyOrder(
+      session.id,
+      result.id
+    );
+
+    claimedSessionId = null;
+
+    console.log(
+      "Printify order created:",
+      {
+        sessionId: session.id,
+        printifyOrderId: result.id,
+      }
+    );
+
+    // SUCCESS
     return res.status(200).json({
       received: true,
       fulfillment: "created",
-      printifyOrderId: printifyResult.id || null,
+      printifyOrderId: result.id,
     });
+
   } catch (error) {
-    console.error("Printify fulfillment failed:", error);
+    console.error(
+      "Order fulfillment failed:",
+      {
+        sessionId: session.id,
+        message: error.message,
+      }
+    );
+
+    // MARK UNCERTAIN ORDERS FOR MANUAL REVIEW
+    if (claimedSessionId) {
+      try {
+        await flagForReview(
+          claimedSessionId
+        );
+      } catch (reviewError) {
+        console.error(
+          "Could not update order review status:",
+          reviewError.message
+        );
+      }
+    }
 
     return res.status(500).json({
-      error: error.message || "Printify fulfillment failed",
+      error: "Order needs manual review",
     });
   }
 }
