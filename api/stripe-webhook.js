@@ -2,6 +2,7 @@
 import Stripe from "stripe";
 import getRawBody from "raw-body";
 import { supabase } from "./supabase.js";
+import { sendOrderAlert } from "../lib/send-order-alert.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -577,6 +578,30 @@ export default async function handler(req, res) {
           reviewError.message
         );
       }
+    }
+
+
+    // SEND EMAIL WHEN ORDER FULFILLMENT FAILS
+    try {
+      await sendOrderAlert(
+        "URGENT: Dad Standard Co. Order Failure",
+        `An order needs attention!
+
+Stripe Session: ${session.id}
+Error: ${error.message}
+
+Check Stripe, Supabase, and Printify.
+
+Do not retry fulfillment until you verify
+whether a Printify order already exists.`
+      );
+
+      console.log("Order failure alert sent");
+    } catch (alertError) {
+      console.error(
+        "Email alert failed:",
+        alertError.message
+      );
     }
 
     return res.status(500).json({
